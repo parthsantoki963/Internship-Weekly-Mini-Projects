@@ -19,7 +19,7 @@ To add an item, pass the item name and the price. The script will automatically 
 
 Command:-
 
--python script_name.py add "Coffee" 4.50
+-python ExpenseTracker.py add "Coffee" 4.50
 
 
 3. Log a backdated expense (Optional)
@@ -28,7 +28,7 @@ If you want to log an expense for a past date, use the -d date
 
 Command:-
 
-python script_name.py add "Groceries" 42.15 -d 15-05-2026
+python ExpenseTracker.py add "Groceries" 42.15 -d 15-05-2026
 
 
 4. View your total summary
@@ -37,4 +37,4 @@ To see an aligned table of all your logged expenses and your grand total:
 
 Command:-
 
-python script_name.py view
+python ExpenseTracker.py view
