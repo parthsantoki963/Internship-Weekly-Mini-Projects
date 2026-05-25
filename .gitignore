@@ -1,0 +1,19 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Virtual Environment
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+venv/
+env/
+
+# Secrets
+.env
+
+# Database (Optional, but recommended so you don't push dummy data)
+*.db
+*.sqlite3
+
+# Python Cache
+__pycache__/
+*.pyc
