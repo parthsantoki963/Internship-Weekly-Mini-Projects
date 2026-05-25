@@ -1,0 +1,286 @@
+from dotenv import load_dotenv
+import os
+
+
+from datetime import datetime, timedelta, timezone
+from typing import Optional
+
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import SQLModel, Field, Session, select, create_engine, func
+import bcrypt
+import jwt
+
+# ==========================================
+# 1. SECURITY & CONFIGURATION
+# ==========================================
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
+
+sqlite_file_name = "AIMaven_corp.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+engine = create_engine(sqlite_url, connect_args={"check_same_thread": False})
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+
+# ==========================================
+# 2. DATABASE MODELS
+# ==========================================
+class UserBase(SQLModel):
+    username: str = Field(unique=True, index=True)
+    full_name: str
+    department: str
+    role: str = Field(default="employee") # "admin" or "employee"
+
+class User(UserBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    hashed_password: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserCreate(UserBase):
+    password: str
+
+class UserPublic(UserBase):
+    id: int
+    created_at: datetime
+
+class TaskBase(SQLModel):
+    title: str
+    description: Optional[str] = None
+    status: str = Field(default="pending") # pending, in_progress, completed
+    priority: str = Field(default="medium") # low, medium, high
+    due_date: Optional[str] = None
+    work_hours: float = Field(default=0.0)
+    daily_update: Optional[str] = None
+
+class Task(TaskBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    owner_id: int = Field(foreign_key="user.id")
+    assigned_by_admin: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    completed_at: Optional[datetime] = None
+
+class TaskUpdate(SQLModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+    priority: Optional[str] = None
+    due_date: Optional[str] = None
+    work_hours: Optional[float] = None
+    daily_update: Optional[str] = None
+
+class TaskHistory(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    task_id: int = Field(foreign_key="task.id")
+    employee_id: int = Field(foreign_key="user.id")
+    action: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# ==========================================
+# 3. UTILITIES & DEPENDENCIES
+# ==========================================
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+def get_password_hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
+    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None: 
+            raise credentials_exception
+    except jwt.InvalidTokenError:
+        raise credentials_exception
+        
+    user = session.exec(select(User).where(User.username == username)).first()
+    if user is None: 
+        raise credentials_exception
+    return user
+
+def get_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin privileges required")
+    return current_user
+
+
+# ==========================================
+# 4. APP INITIALIZATION & STARTUP
+# ==========================================
+app = FastAPI(title="Nexus Corp API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+    # Auto-generate default admin if the database is empty
+    with Session(engine) as session:
+        admin_exists = session.exec(select(User).where(User.role == "admin")).first()
+        if not admin_exists:
+            admin = User(
+                username="admin", 
+                full_name="System Administrator", 
+                department="Management", 
+                role="admin", 
+                hashed_password=get_password_hash("admin123")
+            )
+            session.add(admin)
+            session.commit()
+            print("Default Admin Created -> user: admin | pass: admin123")
+
+
+# ==========================================
+# 5. AUTHENTICATION ROUTES
+# ==========================================
+@app.post("/auth/register", response_model=UserPublic, tags=["Auth"])
+def register(user_data: UserCreate, session: Session = Depends(get_session)):
+    if session.exec(select(User).where(User.username == user_data.username)).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
+    
+    # Force new registrations to be regular employees
+    user_data.role = "employee" 
+    
+    new_user = User(
+        username=user_data.username,
+        full_name=user_data.full_name,
+        department=user_data.department,
+        role=user_data.role,
+        hashed_password=get_password_hash(user_data.password)
+    )
+    session.add(new_user)
+    session.commit()
+    session.refresh(new_user)
+    return new_user
+
+@app.post("/auth/login", tags=["Auth"])
+def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+    user = session.exec(select(User).where(User.username == form_data.username)).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect credentials")
+    
+    token = create_access_token(data={"sub": user.username, "role": user.role})
+    return {"access_token": token, "token_type": "bearer", "role": user.role, "full_name": user.full_name}
+
+
+# ==========================================
+# 6. EMPLOYEE ROUTES
+# ==========================================
+@app.post("/employee/tasks", response_model=Task, tags=["Employee"])
+def create_task(task_in: TaskBase, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    task = Task(**task_in.model_dump(), owner_id=current_user.id)
+    session.add(task)
+    session.commit()
+    session.refresh(task)
+    
+    history = TaskHistory(task_id=task.id, employee_id=current_user.id, action="Created Task")
+    session.add(history)
+    session.commit()
+    return task
+
+@app.get("/employee/tasks", response_model=list[Task], tags=["Employee"])
+def get_my_tasks(current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    return session.exec(select(Task).where(Task.owner_id == current_user.id)).all()
+
+@app.patch("/employee/tasks/{task_id}", response_model=Task, tags=["Employee"])
+def update_task(task_id: int, update_data: TaskUpdate, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    task = session.exec(select(Task).where(Task.id == task_id, Task.owner_id == current_user.id)).first()
+    if not task: 
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    data = update_data.model_dump(exclude_unset=True)
+    if "status" in data and data["status"] == "completed" and task.status != "completed":
+        task.completed_at = datetime.now(timezone.utc)
+        
+    for k, v in data.items():
+        setattr(task, k, v)
+        
+    session.add(task)
+    session.add(TaskHistory(task_id=task.id, employee_id=current_user.id, action="Updated task attributes"))
+    session.commit()
+    session.refresh(task)
+    return task
+
+@app.delete("/employee/tasks/{task_id}", tags=["Employee"])
+def delete_task(task_id: int, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    task = session.exec(select(Task).where(Task.id == task_id, Task.owner_id == current_user.id)).first()
+    if not task: 
+        raise HTTPException(status_code=404, detail="Task not found")
+    session.delete(task)
+    session.commit()
+    return {"ok": True}
+
+
+# ==========================================
+# 7. ADMIN ROUTES
+# ==========================================
+@app.get("/admin/analytics", tags=["Admin"])
+def get_analytics(admin: User = Depends(get_admin_user), session: Session = Depends(get_session)):
+    total_emps = session.exec(select(func.count(User.id)).where(User.role == "employee")).first()
+    total_tasks = session.exec(select(func.count(Task.id))).first()
+    completed = session.exec(select(func.count(Task.id)).where(Task.status == "completed")).first()
+    pending = total_tasks - completed
+    return {"employees": total_emps, "total_tasks": total_tasks, "completed": completed, "pending": pending}
+
+@app.get("/admin/users", response_model=list[UserPublic], tags=["Admin"])
+def get_all_users(admin: User = Depends(get_admin_user), session: Session = Depends(get_session)):
+    return session.exec(select(User).where(User.role == "employee")).all()
+
+@app.get("/admin/tasks", tags=["Admin"])
+def get_all_tasks(admin: User = Depends(get_admin_user), session: Session = Depends(get_session)):
+    tasks = session.exec(select(Task)).all()
+    users = {u.id: u.full_name for u in session.exec(select(User)).all()}
+    
+    result = []
+    for t in tasks:
+        td = t.model_dump()
+        td["owner_name"] = users.get(t.owner_id, "Unknown User")
+        result.append(td)
+    return result
+
+@app.post("/admin/assign-task", tags=["Admin"])
+def assign_task(title: str, description: str, priority: str, due_date: str, owner_id: int, admin: User = Depends(get_admin_user), session: Session = Depends(get_session)):
+    emp = session.exec(select(User).where(User.id == owner_id, User.role == "employee")).first()
+    if not emp: 
+        raise HTTPException(status_code=404, detail="Employee not found")
+    
+    task = Task(title=title, description=description, priority=priority, due_date=due_date, owner_id=owner_id, assigned_by_admin=True)
+    session.add(task)
+    session.commit()
+    return {"message": "Task assigned successfully"}
+
+@app.delete("/admin/tasks/{task_id}", tags=["Admin"])
+def admin_delete_task(task_id: int, admin: User = Depends(get_admin_user), session: Session = Depends(get_session)):
+    task = session.exec(select(Task).where(Task.id == task_id)).first()
+    if not task: 
+        raise HTTPException(status_code=404, detail="Task not found")
+    session.delete(task)
+    session.commit()
+    return {"ok": True}
