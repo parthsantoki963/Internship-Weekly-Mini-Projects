@@ -235,11 +235,26 @@
         .kanban-list::-webkit-scrollbar-thumb:hover { background: var(--ai-cyan); }
         
         .ai-task-card {
-            background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);
-            padding: 20px; border-radius: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative; flex-shrink: 0;
-        }
-        .ai-task-card:hover { transform: translateY(-5px) scale(1.02); background: rgba(255,255,255,0.04); border-color: var(--ai-cyan); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,240,255,0.1); }
+    background: rgba(255,255,255,0.02); 
+    border: 1px solid var(--border-subtle);
+    padding: 20px; 
+    border-radius: 16px; 
+    cursor: pointer; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative; 
+    flex-shrink: 0;
+    margin: 5px; /* Adds breathing room so the card doesn't clip the borders */}
+
+    .ai-task-card:hover { 
+    transform: translateY(-5px) scale(1.02); 
+    background: rgba(255,255,255,0.04); 
+    border-color: var(--ai-cyan); 
+    /* Reduced shadow intensity from 0.4 to 0.2 to soften the glow */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px rgba(0,240,255,0.05); }
+
+    .glow-border:hover::before { 
+    opacity: 0.20; /* Reduced from 0.5 to 0.15 for a soft, professional look */ }
+        
         .ai-task-card.completed { opacity: 0.6; filter: grayscale(50%); }
         .ai-task-card.completed:hover { filter: grayscale(0%); opacity: 1; }
 
