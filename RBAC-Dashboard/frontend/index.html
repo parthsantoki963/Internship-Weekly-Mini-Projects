@@ -1,772 +1,1216 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>AIMaven | Enterprise OS</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
         /* =========================================================
-            1. FUTURISTIC DESIGN SYSTEM & VARIABLES
+            DESIGN TOKENS
         ========================================================= */
         :root {
-            /* Deep Space Palette */
-            --bg-base: #030305;
-            --bg-surface: rgba(12, 12, 18, 0.4);
-            --bg-glass-card: rgba(20, 20, 30, 0.25);
-            
-            /* Holographic Borders */
-            --border-subtle: rgba(255, 255, 255, 0.05);
-            --border-glow: rgba(0, 240, 255, 0.15);
-            
-            /* Neon Accents */
-            --ai-cyan: #00f0ff;
-            --ai-purple: #9d00ff;
-            --ai-pink: #ff0055;
-            --ai-emerald: #00ff9d;
-            --ai-gold: #ffb800;
-            
-            /* Typography */
-            --text-main: #f8fafc;
-            --text-muted: #8a8f98;
-            
-            /* Shadows & Depth */
-            --shadow-hologram: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-            --inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-            
-            /* Mouse Tracking (Updated via JS) */
+            --bg:        #050508;
+            --bg-1:      rgba(14, 14, 22, 0.6);
+            --bg-2:      rgba(22, 22, 36, 0.35);
+            --border:    rgba(255,255,255,0.06);
+            --border-hi: rgba(255,255,255,0.14);
+
+            --cyan:    #00e5ff;
+            --purple:  #a259ff;
+            --pink:    #ff3d71;
+            --green:   #00e5a0;
+            --amber:   #ffb830;
+
+            --txt:     #f0f2f8;
+            --txt-2:   #7a7f93;
+            --txt-3:   #4a4f63;
+
+            --r:       20px;
+            --r-sm:    12px;
+            --r-lg:    28px;
+
+            --sidebar-w: 260px;
+            --top-h:     64px;
+
+            --shadow: 0 8px 40px rgba(0,0,0,0.5);
+            --glow-c: 0 0 0px rgba(0,229,255,0);
+
             --mouse-x: 50%;
             --mouse-y: 50%;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            background: var(--bg);
+            color: var(--txt);
             overflow: hidden;
+            height: 100dvh;
             -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
+        h1,h2,h3,h4,h5,.font-display { font-family: 'outfit', sans-serif; }
 
-        /* Custom Neural Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--ai-purple); border-radius: 10px; box-shadow: 0 0 10px var(--ai-purple); }
+        ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 10px; }
 
         /* =========================================================
-            2. AMBIENT ENGINE (MOUSE TRACKING & ORBS)
+            AMBIENT BACKGROUND
         ========================================================= */
-        /* Dynamic Spotlight that follows the mouse */
+        .bg-orb {
+            position: fixed; border-radius: 50%;
+            pointer-events: none; z-index: 0; filter: blur(80px);
+        }
+        .orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(162,89,255,0.12), transparent 70%); top: -200px; left: -100px; }
+        .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(0,229,255,0.10), transparent 70%); bottom: -100px; right: -100px; }
+        .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,229,160,0.07), transparent 70%); top: 40%; left: 40%; }
+
         .spotlight {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            pointer-events: none; z-index: 9999;
-            background: radial-gradient(circle 600px at var(--mouse-x) var(--mouse-y), rgba(0, 240, 255, 0.04), transparent 80%);
-            mix-blend-mode: screen;
+            position: fixed; inset: 0; pointer-events: none; z-index: 1;
+            background: radial-gradient(circle 700px at var(--mouse-x) var(--mouse-y), rgba(0,229,255,0.035), transparent 70%);
         }
 
-        /* Mesh Gradient Background */
-        .ambient-mesh {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(157, 0, 255, 0.08), transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.08), transparent 50%);
-            filter: blur(60px);
-        }
-
-        /* Noise Texture for Realism */
-        .noise-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
-            pointer-events: none;
+        .noise {
+            position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.025;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
         }
 
         /* =========================================================
-            3. GLASSMORPHISM 2.0 UI COMPONENTS
+            GLASS SYSTEM
         ========================================================= */
-        .glass-panel {
-            background: var(--bg-glass-card);
-            backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--border-subtle);
-            box-shadow: var(--shadow-hologram), var(--inner-glow);
-            border-radius: 20px;
+        .glass {
+            background: var(--bg-1);
+            backdrop-filter: blur(28px) saturate(1.4);
+            -webkit-backdrop-filter: blur(28px) saturate(1.4);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
         }
-
-        /* Animated Gradient Borders */
-        .glow-border {
-            position: relative;
-        }
-        .glow-border::before {
-            content: ""; position: absolute; inset: -1px; border-radius: inherit;
-            background: linear-gradient(90deg, var(--ai-cyan), var(--ai-purple), var(--ai-pink), var(--ai-cyan));
-            background-size: 300% 100%; animation: gradientShift 4s linear infinite;
-            z-index: -1; opacity: 0; transition: opacity 0.3s ease;
-        }
-        .glow-border:hover::before { opacity: 0.5; }
-
-        @keyframes gradientShift { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
-
-        /* Liquid Buttons */
-        .btn {
-            background: rgba(255, 255, 255, 0.03); color: var(--text-main);
-            border: 1px solid var(--border-subtle); padding: 12px 24px; border-radius: 12px;
-            font-family: 'Space Grotesk'; font-weight: 600; font-size: 14px;
-            cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            position: relative; overflow: hidden;
-        }
-        .btn::after {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-        .btn:hover::after { left: 100%; }
-        .btn:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--ai-cyan), var(--ai-purple));
-            border: none; box-shadow: 0 0 20px rgba(157, 0, 255, 0.4);
-            color: #fff;
-        }
-        .btn-primary:hover { box-shadow: 0 0 30px rgba(0, 240, 255, 0.6); transform: scale(1.02) translateY(-2px); }
-
-        /* Inputs */
-        .input-glass {
-            width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-subtle); border-radius: 14px;
-            color: var(--text-main); font-family: 'Inter'; font-size: 15px;
-            transition: all 0.3s; outline: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
-        .input-glass:focus { border-color: var(--ai-cyan); box-shadow: 0 0 20px rgba(0,240,255,0.2), inset 0 2px 10px rgba(0,0,0,0.5); }
-
-        /* Badges */
-        .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
-        .b-high { background: rgba(255, 0, 85, 0.1); color: var(--ai-pink); border: 1px solid rgba(255, 0, 85, 0.3); box-shadow: 0 0 10px rgba(255,0,85,0.2); }
-        .b-med { background: rgba(255, 184, 0, 0.1); color: var(--ai-gold); border: 1px solid rgba(255, 184, 0, 0.3); }
-        .b-low { background: rgba(0, 255, 157, 0.1); color: var(--ai-emerald); border: 1px solid rgba(0, 255, 157, 0.3); }
+        .glass-hi { border-color: var(--border-hi); }
 
         /* =========================================================
-            4. LAYOUT & VIEWS
+            LAYOUT — DESKTOP
         ========================================================= */
-        #appLayout { display: flex; height: 100vh; width: 100vw; opacity: 0; pointer-events: none; transition: opacity 0.8s ease; }
-        #appLayout.visible { opacity: 1; pointer-events: all; }
-        
-        .view-section { display: none; animation: viewReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
-        .view-section.active { display: block; }
-        @keyframes viewReveal { 
-            0% { opacity: 0; transform: translateY(20px) scale(0.98) rotateX(5deg); filter: blur(10px); } 
-            100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); } 
+        #appShell {
+            position: relative; z-index: 10;
+            display: flex; height: 100dvh; width: 100vw;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.7s ease;
         }
+        #appShell.visible { opacity: 1; pointer-events: all; }
 
-        /* Sidebar Navigation */
+        /* SIDEBAR */
         .sidebar {
-            width: 280px; padding: 32px 24px; margin: 16px; border-radius: 24px;
-            display: flex; flex-direction: column; gap: 32px; z-index: 10;
+            width: var(--sidebar-w);
+            flex-shrink: 0;
+            display: flex; flex-direction: column;
+            padding: 24px 16px;
+            margin: 12px 0 12px 12px;
+            z-index: 200;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 10px; margin-bottom: 8px;
+        }
+        .brand-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 20px rgba(0,229,255,0.3);
+            flex-shrink: 0;
+        }
+        .brand-name { font-family: 'Manrope'; font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+        .brand-sub { font-size: 10px; color: var(--txt-2); letter-spacing: 2px; text-transform: uppercase; }
+
+        .nav-section { margin-top: 16px; }
+        .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--txt-3); padding: 0 12px; margin-bottom: 6px; font-family: 'Manrope'; font-weight: 700; }
+
+        .nav-links { list-style: none; display: flex; flex-direction: column; gap: 2px; }
         .nav-item {
-            padding: 14px 16px; border-radius: 12px; cursor: pointer; color: var(--text-muted);
-            font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.3s;
+            padding: 11px 14px; border-radius: var(--r-sm);
+            cursor: pointer; color: var(--txt-2);
+            font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.2s; position: relative;
+            user-select: none;
+        }
+        .nav-item i { font-size: 18px; flex-shrink: 0; }
+        .nav-item:hover { color: var(--txt); background: rgba(255,255,255,0.04); }
+        .nav-item.active {
+            color: var(--cyan); background: rgba(0,229,255,0.07);
+            border: 1px solid rgba(0,229,255,0.12);
+        }
+        .nav-item.active::before {
+            content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 3px;
+            background: var(--cyan); border-radius: 0 3px 3px 0;
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        .sidebar-footer {
+            margin-top: auto; padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .user-pill {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: var(--r-sm);
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            cursor: default;
+        }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Manrope'; font-weight: 700; font-size: 15px;
+        }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { font-size: 10px; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
+
+        /* MAIN */
+        .main-wrap {
+            flex: 1; min-width: 0;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* TOP BAR */
+        .topbar {
+            height: var(--top-h);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 28px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+        #hamburger {
+            display: none;
+            background: none; border: none; cursor: pointer; color: var(--txt);
+            padding: 6px; border-radius: 8px;
+        }
+        #hamburger:hover { background: rgba(255,255,255,0.06); }
+        #hamburger i { font-size: 22px; }
+
+        .page-title { font-family: 'Manrope'; font-size: 18px; font-weight: 700; }
+
+        /* CONTENT */
+        .content-area {
+            flex: 1; overflow-y: auto; overflow-x: hidden;
+            padding: 28px;
+        }
+
+        /* VIEWS */
+        .view { display: none; animation: viewIn 0.45s cubic-bezier(0.16,1,0.3,1) forwards; }
+        .view.active { display: block; }
+        @keyframes viewIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================================
+            COMPONENTS
+        ========================================================= */
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            padding: 20px 22px;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 12px;
             position: relative; overflow: hidden;
         }
-        .nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
-        .nav-item.active { color: var(--ai-cyan); background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.1); }
-        .nav-item.active::before { content:''; position:absolute; left:0; top:20%; height:60%; width:3px; background:var(--ai-cyan); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--ai-cyan); }
-
-        .main-content { flex: 1; padding: 40px 60px; overflow-y: auto; perspective: 1000px; }
-
-        /* =========================================================
-            5. DASHBOARD WIDGETS
-        ========================================================= */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
-        .ai-stat-card {
-            padding: 24px; display: flex; align-items: center; justify-content: space-between;
-            overflow: hidden; position: relative; transition: transform 0.4s;
+        .stat-card::after {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 80% 120%, var(--accent, transparent) 0%, transparent 60%);
+            opacity: 0.08; pointer-events: none;
         }
-        .ai-stat-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
-        /* Neural Background Pattern */
-        .ai-stat-card::after {
-            content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px;
-            background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; filter: blur(20px);
+        .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--txt-2); margin-bottom: 6px; font-family: 'Manrope'; font-weight: 600; }
+        .stat-value { font-size: 32px; font-weight: 800; font-family: 'Manrope'; line-height: 1; }
+        .stat-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+        .stat-change { font-size: 12px; margin-top: 6px; color: var(--txt-2); }
+
+        /* SECTION HEADER */
+        .sec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+        .sec-title { font-family: 'Manrope'; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+        /* KANBAN */
+        .kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .kb-col {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 16px;
+            min-height: 400px;
+            display: flex; flex-direction: column; gap: 12px;
         }
-        .stat-value { font-size: 36px; font-weight: 700; background: linear-gradient(to right, #fff, #a0a0a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 8px; }
-
-        /* SVG Circular Progress (AI Score) */
-        .ring-container { position: relative; width: 64px; height: 64px; }
-        .ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
-        .ring-fill { fill: none; stroke: url(#ai-gradient); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 176; stroke-dashoffset: 176; transition: stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        .ring-text { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-weight:700; font-size:14px; font-family: 'Space Grotesk'; }
-
-        /* =========================================================
-            6. TASKS & KANBAN (CINEMATIC)
-        ========================================================= */
-        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .kanban-col { background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 20px; min-height: 500px; display: flex; flex-direction: column; gap: 16px; }
-        .kanban-col-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 8px; font-family: 'Space Grotesk'; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .ai-task-card {
-            background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);
-            padding: 20px; border-radius: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
+        .kb-col-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Manrope'; font-size: 12px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px;
         }
-        .ai-task-card:hover { transform: translateY(-5px) scale(1.02); background: rgba(255,255,255,0.04); border-color: var(--ai-cyan); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,240,255,0.1); }
-        .ai-task-card.completed { opacity: 0.6; filter: grayscale(50%); }
-        .ai-task-card.completed:hover { filter: grayscale(0%); opacity: 1; }
+        .kb-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }
 
-        /* =========================================================
-            7. MODALS & AUTH (HOLOGRAPHIC)
-        ========================================================= */
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: 0.4s; }
+        .task-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .task-card:hover {
+            border-color: rgba(0,229,255,0.25);
+            background: rgba(0,229,255,0.04);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+        }
+        .task-card.done { opacity: 0.55; }
+        .task-card.done:hover { opacity: 1; }
+        .task-title { font-family: 'Manrope'; font-size: 14px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; }
+        .task-desc { font-size: 12px; color: var(--txt-2); margin-bottom: 10px; line-height: 1.5; }
+        .task-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px solid var(--border); }
+
+        /* BADGES */
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'Manrope'; }
+        .badge-high { background: rgba(255,61,113,0.12); color: var(--pink); border: 1px solid rgba(255,61,113,0.25); }
+        .badge-medium { background: rgba(255,184,48,0.12); color: var(--amber); border: 1px solid rgba(255,184,48,0.25); }
+        .badge-low { background: rgba(0,229,160,0.12); color: var(--green); border: 1px solid rgba(0,229,160,0.25); }
+        .badge-tag { background: rgba(255,255,255,0.06); color: var(--txt-2); border: 1px solid var(--border); }
+        .badge-count { padding: 2px 8px; border-radius: 100px; background: rgba(255,255,255,0.08); font-size: 11px; font-weight: 700; }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: var(--r-sm);
+            font-family: 'Manrope'; font-weight: 600; font-size: 13px;
+            cursor: pointer; border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--txt); transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn:hover { background: rgba(255,255,255,0.08); border-color: var(--border-hi); }
+        .btn:active { transform: scale(0.97); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border: none; color: #fff;
+            box-shadow: 0 4px 20px rgba(162,89,255,0.35);
+        }
+        .btn-primary:hover { box-shadow: 0 6px 28px rgba(0,229,255,0.4); filter: brightness(1.1); }
+
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
+        .btn-icon { padding: 8px; aspect-ratio: 1; }
+
+        .btn-ghost { background: transparent; border-color: var(--border); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.04); }
+
+        .btn-danger { border-color: rgba(255,61,113,0.3); color: var(--pink); }
+        .btn-danger:hover { background: rgba(255,61,113,0.08); }
+
+        /* INPUTS */
+        .input {
+            width: 100%; padding: 11px 16px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: var(--r-sm);
+            color: var(--txt); font-family: 'Manrope'; font-size: 14px;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input:focus { border-color: rgba(0,229,255,0.4); box-shadow: 0 0 0 3px rgba(0,229,255,0.08); }
+        .input::placeholder { color: var(--txt-3); }
+        select.input { appearance: none; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f93' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+        /* TASK CREATOR */
+        .task-creator {
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .task-creator-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* RING */
+        .ring-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+        .ring-wrap svg { transform: rotate(-90deg); }
+        .ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 5; }
+        .ring-fill { fill: none; stroke: url(#ring-grad); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 138; stroke-dashoffset: 138; transition: stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .ring-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; font-family: 'Manrope'; }
+
+        /* XP BAR */
+        .xp-wrap { display: flex; align-items: center; gap: 10px; }
+        .xp-bar-bg { flex: 1; height: 5px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; min-width: 60px; }
+        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--cyan)); border-radius: 3px; transition: width 1s ease; }
+        .xp-level { font-family: 'Manrope'; font-weight: 800; font-size: 13px; color: var(--purple); white-space: nowrap; }
+
+        /* ADMIN TASK FEED */
+        .admin-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 16px; }
+        .admin-task-card { padding: 20px; position: relative; overflow: hidden; }
+        .admin-task-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent-color, var(--border)); }
+
+        /* PERSONNEL */
+        .personnel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .person-card { padding: 22px; }
+        .person-header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+        .person-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--cyan)); display: flex; align-items: center; justify-content: center; font-family: 'Manrope'; font-weight: 800; font-size: 20px; flex-shrink: 0; }
+        .eff-bar-bg { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; margin-bottom: 16px; }
+        .eff-bar-fill { height: 100%; background: var(--green); border-radius: 2px; box-shadow: 0 0 6px var(--green); }
+        .person-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .mini-stat { background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 14px; border-radius: var(--r-sm); text-align: center; }
+        .mini-stat-val { font-family: 'Manrope'; font-size: 24px; font-weight: 800; }
+        .mini-stat-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--txt-2); margin-top: 4px; font-family: 'Manrope'; }
+
+        /* TIMELINE */
+        .timeline { border-left: 2px solid rgba(0,229,255,0.15); margin-left: 12px; padding-left: 28px; display: flex; flex-direction: column; gap: 28px; }
+        .tl-item { position: relative; }
+        .tl-dot { position: absolute; left: -37px; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+        .tl-time { font-size: 11px; color: var(--cyan); font-family: 'Manrope'; letter-spacing: 1px; margin-bottom: 8px; }
+        .tl-card { padding: 14px 16px; border-radius: var(--r-sm); background: rgba(0,229,255,0.03); border: 1px solid rgba(0,229,255,0.1); }
+        .tl-actor { font-weight: 600; font-size: 14px; }
+        .tl-action { color: var(--pink); font-size: 14px; }
+        .tl-task { font-size: 12px; color: var(--txt-2); margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        /* MODALS */
+        .overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
+        }
         .overlay.active { opacity: 1; pointer-events: all; }
-        
-        .auth-container { width: 100%; max-width: 420px; position: relative; }
-        /* Holographic Scanner effect */
-        .auth-container::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--ai-cyan); box-shadow: 0 0 20px var(--ai-cyan); animation: scan 3s ease-in-out infinite alternate; z-index: 10; border-radius: 50%; opacity: 0.5; }
-        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
-        .toast-container { position: fixed; bottom: 32px; right: 32px; z-index: 2000; display: flex; flex-direction: column; gap: 16px; }
-        .toast { background: rgba(12,12,18,0.9); backdrop-filter: blur(10px); border: 1px solid var(--border-subtle); border-left: 4px solid var(--ai-cyan); padding: 16px 24px; border-radius: 12px; display: flex; align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: toastReveal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes toastReveal { from { opacity: 0; transform: translateX(100px) scale(0.9); } to { opacity: 1; transform: translateX(0) scale(1); } }
+        .modal {
+            width: 100%; max-width: 440px;
+            padding: 28px;
+            animation: modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.92) translateY(20px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-title { font-family: 'Manrope'; font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+        .modal-fields { display: flex; flex-direction: column; gap: 12px; }
+        .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 
-    .hidden {
-    display: none !important;
-    }
+        /* AUTH */
+        .auth-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            background: var(--bg);
+            transition: opacity 0.6s;
+        }
+        .auth-overlay.hidden { opacity: 0; pointer-events: none; }
+
+        .auth-card { width: 100%; max-width: 400px; padding: 40px 36px; }
+        .auth-logo { text-align: center; margin-bottom: 32px; }
+        .auth-logo-icon {
+            width: 64px; height: 64px; border-radius: 18px;
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 40px rgba(162,89,255,0.4);
+        }
+        .auth-title { font-family: 'Manrope'; font-size: 28px; font-weight: 800; }
+        .auth-sub { font-size: 12px; color: var(--txt-2); text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; }
+        .auth-fields { display: flex; flex-direction: column; gap: 14px; }
+        .auth-toggle { text-align: center; margin-top: 20px; font-size: 13px; color: var(--txt-2); cursor: pointer; }
+        .auth-toggle span { color: var(--cyan); }
+        .auth-toggle:hover span { text-decoration: underline; }
+
+        /* SCAN LINE on auth */
+        .auth-card::before {
+            content: ''; position: absolute; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            animation: authScan 4s ease-in-out infinite;
+            opacity: 0.4; pointer-events: none;
+        }
+        @keyframes authScan {
+            0%,100% { top: 0; opacity: 0; }
+            20% { opacity: 0.4; }
+            80% { opacity: 0.4; }
+            99% { top: 100%; opacity: 0; }
+        }
+
+        /* TOASTS */
+        .toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 18px; border-radius: var(--r-sm);
+            background: rgba(14,14,22,0.95); backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            font-size: 14px; font-weight: 500;
+            animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            pointer-events: all; min-width: 220px; max-width: 340px;
+        }
+        .toast.success { border-left: 3px solid var(--green); }
+        .toast.error   { border-left: 3px solid var(--pink); }
+        @keyframes toastIn { from { opacity:0; transform:translateX(30px) scale(0.95); } to { opacity:1; transform:translateX(0) scale(1); } }
+
+        /* SIDEBAR OVERLAY (mobile) */
+        .sidebar-backdrop {
+            display: none; position: fixed; inset: 0; z-index: 190;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+        }
+
+        /* =========================================================
+            RESPONSIVE BREAKPOINTS
+        ========================================================= */
+
+        /* TABLET — ≤ 1024px */
+        @media (max-width: 1024px) {
+            :root { --sidebar-w: 220px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .kanban { grid-template-columns: 1fr; }
+            .task-creator-grid { grid-template-columns: 1fr 1fr; }
+            .task-creator-grid .btn-primary { grid-column: span 2; }
+            .admin-task-grid { grid-template-columns: 1fr; }
+            .content-area { padding: 20px; }
+        }
+
+        /* MOBILE — ≤ 768px */
+        @media (max-width: 768px) {
+            :root { --top-h: 58px; }
+
+            #hamburger { display: flex; }
+
+            .sidebar {
+                position: fixed; left: 0; top: 0; bottom: 0;
+                margin: 0; border-radius: 0 var(--r-lg) var(--r-lg) 0;
+                transform: translateX(-100%);
+                border-right: 1px solid var(--border-hi);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-backdrop.open { display: block; }
+
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .stat-card { padding: 16px; }
+            .stat-value { font-size: 26px; }
+            .stat-icon { font-size: 22px; }
+
+            .task-creator-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .task-creator-grid > *:first-child { grid-column: span 2; }
+            .task-creator-grid .btn-primary { grid-column: span 2; }
+
+            .kanban { grid-template-columns: 1fr; }
+
+            .admin-task-grid { grid-template-columns: 1fr; }
+            .personnel-grid { grid-template-columns: 1fr; }
+
+            .content-area { padding: 16px; }
+
+            .modal { padding: 22px 18px; max-width: 100%; }
+            .modal-footer { flex-direction: column; }
+            .modal-footer .btn { width: 100%; justify-content: center; }
+
+            .topbar { padding: 0 16px; }
+
+            .auth-card { padding: 32px 24px; }
+            .toast-wrap { right: 12px; bottom: 12px; left: 12px; }
+            .toast { min-width: unset; }
+
+            .sec-header { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* SMALL MOBILE — ≤ 400px */
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .stat-value { font-size: 22px; }
+            .task-creator-grid { grid-template-columns: 1fr; }
+            .task-creator-grid .btn-primary { grid-column: span 1; }
+        }
+
+        /* =========================================================
+            UTILITY
+        ========================================================= */
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .text-muted { color: var(--txt-2); }
+        .text-sm { font-size: 13px; }
+        .text-xs { font-size: 11px; }
+        .w-full { width: 100%; }
+        .mb-4 { margin-bottom: 16px; }
+
+        /* Export button responsive hide label */
+        @media (max-width: 500px) {
+            .btn .btn-label { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="spotlight"></div>
-    <div class="ambient-mesh"></div>
-    <div class="noise-overlay"></div>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+<div class="spotlight"></div>
+<div class="noise"></div>
 
-    <div class="toast-container" id="toastContainer"></div>
+<div class="toast-wrap" id="toastWrap"></div>
 
-    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-      <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#00f0ff" />
-        <stop offset="100%" stop-color="#9d00ff" />
-      </linearGradient>
-    </svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+        <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00e5ff"/>
+            <stop offset="100%" stop-color="#a259ff"/>
+        </linearGradient>
+    </defs>
+</svg>
 
-    <div class="overlay active" id="authSection" style="opacity: 1; pointer-events: all; background: transparent;">
-        <div class="auth-container">
-            <div class="glass-panel" style="padding: 48px;">
-                <div style="text-align: center; margin-bottom: 40px;">
-                    <i class="ph-fill ph-hexagon" style="font-size: 56px; background: linear-gradient(to bottom right, var(--ai-cyan), var(--ai-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
-                    <h2 id="authTitle" style="font-size: 32px; margin-top: 16px;">AIMaven OS</h2>
-                    <p style="color: var(--text-muted); font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">System Access</p>
+<!-- AUTH -->
+<div class="auth-overlay" id="authScreen">
+    <div class="auth-card glass glass-hi" style="position:relative;">
+        <div class="auth-logo">
+            <div class="auth-logo-icon">
+                <i class="ph-fill ph-hexagon" style="font-size:32px; color:#fff;"></i>
+            </div>
+            <div class="auth-title" id="authTitle">AIMaven OS</div>
+            <div class="auth-sub">System Access</div>
+        </div>
+        <form onsubmit="event.preventDefault(); doAuth();">
+            <div class="auth-fields">
+                <input class="input" id="f-user" type="text" placeholder="Username" required autocomplete="username">
+                <input class="input" id="f-pass" type="password" placeholder="Password" required autocomplete="current-password">
+                <div id="reg-extra" style="display:none; flex-direction:column; gap:12px;">
+                    <input class="input" id="f-name" type="text" placeholder="Full Name">
+                    <input class="input" id="f-dept" type="text" placeholder="Department">
                 </div>
-
-                <form onsubmit="event.preventDefault(); executeAuth();">
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        <input type="text" id="username" class="input-glass" placeholder="Username" required>
-                        <input type="password" id="password" class="input-glass" placeholder="Password" required>
-                        
-                        <div id="reg-fields" style="display: none; flex-direction: column; gap: 20px;">
-                            <input type="text" id="fullname" class="input-glass" placeholder="Full Name">
-                            <input type="text" id="department" class="input-glass" placeholder="Department">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="authBtn" style="width: 100%; margin-top: 32px; padding: 16px;">Login</button>
-                </form>
-                <div style="text-align: center; margin-top: 24px; color: var(--text-muted); cursor: pointer; font-size: 13px;" onclick="toggleAuthMode()" id="authToggleText">Request Access (Register)</div>
+                <button type="submit" class="btn btn-primary w-full" id="authBtn" style="padding:13px; justify-content:center; margin-top:4px;">
+                    Login
+                </button>
             </div>
+        </form>
+        <div class="auth-toggle" onclick="toggleAuth()">
+            <span id="authToggle">Don't have access? Register →</span>
         </div>
     </div>
+</div>
 
-    <div class="overlay" id="progressModal">
-        <div class="glass-panel" style="padding: 32px; width: 440px;">
-            <h3 style="margin-bottom: 24px;">Task Status</h3>
-            <input type="hidden" id="p-task-id">
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <select id="p-status" class="input-glass"><option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="completed">Completed</option></select>
-                <input type="number" id="p-hours" class="input-glass" placeholder="Hours Logged" step="0.5">
-                <input type="text" id="p-update" class="input-glass" placeholder="Update notes...">
-            </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                <button class="btn btn-ghost" onclick="closeModal('progressModal')">Abort</button>
-                <button class="btn btn-primary" onclick="submitProgress()">Synchronize</button>
-            </div>
+<!-- MODAL: Progress -->
+<div class="overlay" id="modalProgress">
+    <div class="modal glass glass-hi">
+        <div class="modal-title">Update Task</div>
+        <input type="hidden" id="p-id">
+        <div class="modal-fields">
+            <select class="input" id="p-status">
+                <option value="pending">Pending</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+            <input class="input" type="number" id="p-hours" placeholder="Hours logged" step="0.5">
+            <input class="input" type="text" id="p-note" placeholder="Status notes...">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('modalProgress')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitProgress()">Save Changes</button>
         </div>
     </div>
+</div>
 
-    <div class="overlay" id="assignModal">
-        <div class="glass-panel" style="padding: 32px; width: 440px;">
-            <h3 style="margin-bottom: 24px;">Assign Task</h3>
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <select id="a-emp" class="input-glass"></select>
-                <input type="text" id="a-title" class="input-glass" placeholder="Task Title">
-                <input type="text" id="a-desc" class="input-glass" placeholder="Task Details">
-                <div style="display:flex; gap:12px;">
-                    <select id="a-priority" class="input-glass" style="flex:1"><option value="low">Low Priority</option><option value="medium" selected>Medium Priority</option><option value="high">Critical</option></select>
-                    <input type="date" id="a-date" class="input-glass" style="flex:1">
-                </div>
-            </div>
-            <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                <button class="btn btn-ghost" onclick="closeModal('assignModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitAssignTask()">Assign</button>
+<!-- MODAL: Assign Task -->
+<div class="overlay" id="modalAssign">
+    <div class="modal glass glass-hi">
+        <div class="modal-title">Assign Task</div>
+        <div class="modal-fields">
+            <select class="input" id="a-emp"></select>
+            <input class="input" type="text" id="a-title" placeholder="Task title">
+            <input class="input" type="text" id="a-desc" placeholder="Description">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <select class="input" id="a-pri">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">Critical</option>
+                </select>
+                <input class="input" type="date" id="a-date">
             </div>
         </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal('modalAssign')">Cancel</button>
+            <button class="btn btn-primary" onclick="submitAssign()">Assign Task</button>
+        </div>
     </div>
+</div>
 
-    <div id="appLayout">
-        
-        <aside class="sidebar glass-panel glow-border">
-            <div class="brand"><i class="ph-fill ph-hexagon" style="color:var(--ai-cyan)"></i><span>AIMaven OS</span></div>
-            
-            <ul class="nav-links" id="nav-employee" style="display:none; margin-top: 24px;">
-                <li class="nav-item active" onclick="switchView('empDashboardView', this)"><i class="ph ph-cpu"></i><span>Dashboard</span></li>
+<!-- APP SHELL -->
+<div id="appShell">
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebarBg" onclick="closeSidebar()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar glass" id="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="ph-fill ph-hexagon" style="font-size:20px; color:#fff;"></i>
+            </div>
+            <div>
+                <div class="brand-name">AIMaven</div>
+                <div class="brand-sub" style="font-size:9px;">OS v2.0</div>
+            </div>
+        </div>
+
+        <!-- Employee Nav -->
+        <nav class="nav-section" id="nav-emp" style="display:none;">
+            <div class="nav-label">Workspace</div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="gotoView('vEmpDash', this)">
+                    <i class="ph ph-squares-four"></i><span>Dashboard</span>
+                </li>
             </ul>
+        </nav>
 
-            <ul class="nav-links" id="nav-admin" style="display:none; margin-top: 24px;">
-                <li class="nav-item active" id="defaultAdminTab" onclick="switchView('adminDashboardView', this)"><i class="ph ph-globe-hemisphere-west"></i><span>Admin Dashboard</span></li>
-                <li class="nav-item" onclick="switchView('adminPersonnelView', this)"><i class="ph ph-users-three"></i><span>Employees</span></li>
-                <li class="nav-item" onclick="switchView('adminAuditView', this)"><i class="ph ph-radar"></i><span>System Logs</span></li>
-                <li class="nav-item" onclick="openAssignModal()"><i class="ph ph-target"></i><span>Assign Task</span></li>
+        <!-- Admin Nav -->
+        <nav class="nav-section" id="nav-adm" style="display:none;">
+            <div class="nav-label">Control Center</div>
+            <ul class="nav-links">
+                <li class="nav-item active" id="defaultAdminNav" onclick="gotoView('vAdmDash', this)">
+                    <i class="ph ph-chart-pie"></i><span>Overview</span>
+                </li>
+                <li class="nav-item" onclick="gotoView('vAdmPeople', this)">
+                    <i class="ph ph-users-three"></i><span>Employees</span>
+                </li>
+                <li class="nav-item" onclick="gotoView('vAdmLogs', this)">
+                    <i class="ph ph-activity"></i><span>System Logs</span>
+                </li>
+                <li class="nav-item" onclick="openAssignModal()">
+                    <i class="ph ph-plus-circle"></i><span>Assign Task</span>
+                </li>
             </ul>
+        </nav>
 
-            <div style="margin-top: auto;">
-                <div class="glass-panel" style="padding: 16px; display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.4); border-radius: 16px;">
-                    <div class="avatar" id="userAvatar">U</div>
-                    <div style="flex: 1; overflow: hidden;">
-                        <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px;" id="displayUsername">User</div>
-                        <div style="font-size: 11px; color: var(--ai-cyan); text-transform: uppercase; letter-spacing: 1px;" id="displayRole">Role</div>
-                    </div>
-                    <button class="btn" style="padding: 8px; border:none; background:transparent;" onclick="logout()"><i class="ph ph-power" style="color: var(--ai-pink)"></i></button>
+        <div class="sidebar-footer">
+            <div class="user-pill">
+                <div class="avatar" id="sAvatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="sName">User</div>
+                    <div class="user-role" id="sRole">Role</div>
                 </div>
+                <button class="btn btn-icon btn-ghost btn-sm" style="border:none; color:var(--pink);" onclick="doLogout()" title="Logout">
+                    <i class="ph ph-sign-out" style="font-size:16px;"></i>
+                </button>
             </div>
-        </aside>
+        </div>
+    </aside>
 
-        <main class="main-content">
-            
-            <div id="empDashboardView" class="view-section">
-                
-                <div class="header-actions">
-                    <div>
-                        <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Dashboard</h2>
-                        <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Welcome back.</p>
+    <!-- MAIN -->
+    <div class="main-wrap">
+
+        <!-- TOP BAR -->
+        <header class="topbar" style="background: rgba(5,5,8,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);">
+            <div class="topbar-left">
+                <button id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+                    <i class="ph ph-list"></i>
+                </button>
+                <div class="page-title" id="pageTitle">Dashboard</div>
+            </div>
+            <div class="topbar-right">
+                <!-- XP Bar (employee only) -->
+                <div id="xpSection" style="display:none;" class="xp-wrap">
+                    <div class="xp-level" id="xpLevel">LVL 1</div>
+                    <div class="xp-bar-bg" style="width:80px;">
+                        <div class="xp-bar-fill" id="xpFill" style="width:0%"></div>
                     </div>
-                    <div class="glass-panel" style="padding: 12px 24px; display: flex; align-items: center; gap: 16px; border-radius: 100px;">
-                        <div style="text-align: right;">
-                            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">User Level</div>
-                            <div style="font-family: 'Space Grotesk'; font-weight: 700; color: var(--ai-purple);" id="emp-level">LVL 1</div>
+                </div>
+                <!-- Export (admin only) -->
+                <button class="btn btn-sm" id="exportBtn" style="display:none; border-color:rgba(0,229,160,0.3); color:var(--green);" onclick="exportCSV()">
+                    <i class="ph ph-download-simple"></i><span class="btn-label">Export</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <div class="content-area">
+
+            <!-- EMPLOYEE DASHBOARD -->
+            <div class="view active" id="vEmpDash">
+                <div class="stats-grid" id="empStats">
+                    <div class="glass stat-card" style="--accent: var(--cyan)">
+                        <div><div class="stat-label">Total Tasks</div><div class="stat-value" id="eTotal">0</div></div>
+                        <i class="ph-fill ph-target stat-icon" style="color:var(--cyan)"></i>
+                    </div>
+                    <div class="glass stat-card" style="--accent: var(--amber)">
+                        <div><div class="stat-label">In Progress</div><div class="stat-value" id="eInProg">0</div></div>
+                        <i class="ph-fill ph-arrows-clockwise stat-icon" style="color:var(--amber)"></i>
+                    </div>
+                    <div class="glass stat-card" style="--accent: var(--green)">
+                        <div><div class="stat-label">Completed</div><div class="stat-value" id="eDone">0</div></div>
+                        <i class="ph-fill ph-check-circle stat-icon" style="color:var(--green)"></i>
+                    </div>
+                    <div class="glass stat-card" style="--accent: var(--purple)">
+                        <div><div class="stat-label">Efficiency</div><div class="stat-value" id="eEff" style="font-size:24px;">0%</div></div>
+                        <div class="ring-wrap">
+                            <svg viewBox="0 0 52 52" width="52" height="52">
+                                <circle cx="26" cy="26" r="22" class="ring-bg"/>
+                                <circle cx="26" cy="26" r="22" class="ring-fill" id="eRing"/>
+                            </svg>
+                            <div class="ring-text"><i class="ph-fill ph-lightning" style="color:var(--amber)"></i></div>
                         </div>
-                        <div style="width: 100px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                            <div id="emp-xp-bar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--ai-purple), var(--ai-cyan)); transition: 1s ease;"></div>
-                        </div>
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="glass-panel ai-stat-card" style="--accent: var(--ai-cyan)">
-                        <div><div class="stat-label">Total Tasks</div><div class="stat-value" id="e-stat-total">0</div></div>
-                        <i class="ph-fill ph-target" style="font-size: 32px; color: var(--ai-cyan)"></i>
-                    </div>
-                    <div class="glass-panel ai-stat-card" style="--accent: var(--ai-gold)">
-                        <div><div class="stat-label">In Progress</div><div class="stat-value" id="e-stat-pending">0</div></div>
-                        <i class="ph-fill ph-spinner-gap" style="font-size: 32px; color: var(--ai-gold)"></i>
-                    </div>
-                    <div class="glass-panel ai-stat-card" style="--accent: var(--ai-emerald)">
-                        <div><div class="stat-label">Completed</div><div class="stat-value" id="e-stat-completed">0</div></div>
-                        <i class="ph-fill ph-check-circle" style="font-size: 32px; color: var(--ai-emerald)"></i>
-                    </div>
-                    <div class="glass-panel ai-stat-card" style="--accent: var(--ai-purple)">
-                        <div><div class="stat-label">Efficiency</div><div class="stat-value" style="font-size: 24px;" id="e-stat-percent">0%</div></div>
-                        <div class="ring-container">
-                            <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" class="ring-bg"></circle><circle cx="32" cy="32" r="28" class="ring-fill" id="e-progress"></circle></svg>
-                            <div class="ring-text"><i class="ph-fill ph-lightning" style="color: var(--ai-gold)"></i></div>
-                        </div>
+                <!-- Task Creator -->
+                <div class="glass task-creator">
+                    <div class="task-creator-grid">
+                        <input class="input" id="t-title" placeholder="New task title...">
+                        <input class="input" id="t-desc" placeholder="Description (optional)">
+                        <select class="input" id="t-pri">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">Critical</option>
+                        </select>
+                        <input class="input" type="date" id="t-date">
+                        <button class="btn btn-primary" onclick="createTask()">
+                            <i class="ph ph-plus"></i> Add
+                        </button>
                     </div>
                 </div>
 
-                <div class="glass-panel" style="padding: 24px; margin-bottom: 40px; display: flex; gap: 16px; align-items: center;">
-                    <input type="text" id="t-title" class="input-glass" style="flex:2; background: rgba(0,0,0,0.4);" placeholder="Create new task...">
-                    <input type="text" id="t-desc" class="input-glass" style="flex:2;" placeholder="Description...">
-                    <select id="t-priority" class="input-glass" style="flex:1;"><option value="low">Standard</option><option value="medium" selected>Elevated</option><option value="high">Critical</option></select>
-                    <input type="date" id="t-date" class="input-glass" style="flex:1;">
-                    <button class="btn btn-primary" style="padding: 16px 32px;" onclick="createEmployeeTask()">Create</button>
+                <!-- Kanban -->
+                <div class="sec-header">
+                    <div class="sec-title"><i class="ph-fill ph-kanban" style="color:var(--cyan)"></i> My Tasks</div>
                 </div>
-
-                <h3 style="margin-bottom: 24px; font-size: 20px; display: flex; align-items: center; gap: 8px;"><i class="ph-fill ph-kanban" style="color: var(--ai-cyan)"></i> My Tasks</h3>
-                <div class="kanban-board" id="empKanbanBoard">
-                    <div class="kanban-col glow-border">
-                        <div class="kanban-col-header"><span>Pending</span> <span class="badge" style="background:rgba(255,255,255,0.1)" id="kb-pen-count">0</span></div>
-                        <div id="kb-pending" style="display:flex; flex-direction:column; gap:16px;"></div>
+                <div class="kanban">
+                    <div class="kb-col">
+                        <div class="kb-col-head"><span>Pending</span><span class="badge-count" id="cntPen">0</span></div>
+                        <div class="kb-body" id="kbPen"></div>
                     </div>
-                    <div class="kanban-col glow-border" style="border-color: rgba(255,184,0,0.2);">
-                        <div class="kanban-col-header"><span style="color:var(--ai-gold)">In Progress</span> <span class="badge b-med" id="kb-inp-count">0</span></div>
-                        <div id="kb-inprogress" style="display:flex; flex-direction:column; gap:16px;"></div>
+                    <div class="kb-col" style="border-color: rgba(255,184,48,0.15);">
+                        <div class="kb-col-head"><span style="color:var(--amber)">In Progress</span><span class="badge-count" id="cntInp">0</span></div>
+                        <div class="kb-body" id="kbInp"></div>
                     </div>
-                    <div class="kanban-col glow-border" style="border-color: rgba(0,255,157,0.2);">
-                        <div class="kanban-col-header"><span style="color:var(--ai-emerald)">Completed</span> <span class="badge b-low" id="kb-com-count">0</span></div>
-                        <div id="kb-completed" style="display:flex; flex-direction:column; gap:16px;"></div>
+                    <div class="kb-col" style="border-color: rgba(0,229,160,0.15);">
+                        <div class="kb-col-head"><span style="color:var(--green)">Completed</span><span class="badge-count" id="cntDon">0</span></div>
+                        <div class="kb-body" id="kbDon"></div>
                     </div>
                 </div>
             </div>
 
-            <div id="adminDashboardView" class="view-section">
-                <div class="header-actions">
-                    <div>
-                        <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Admin Dashboard</h2>
-                        <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Global system overview.</p>
+            <!-- ADMIN DASHBOARD -->
+            <div class="view" id="vAdmDash">
+                <div class="stats-grid" id="admStats">
+                    <div class="glass stat-card" style="border-top: 2px solid var(--cyan); --accent: var(--cyan)">
+                        <div><div class="stat-label">Employees</div><div class="stat-value" id="aEmp">0</div></div>
+                        <i class="ph-fill ph-users stat-icon" style="color:var(--cyan)"></i>
                     </div>
-                    <button class="btn" style="border-color: var(--ai-emerald); color: var(--ai-emerald);" onclick="exportCSV()"><i class="ph ph-download-simple"></i> Export Data</button>
+                    <div class="glass stat-card" style="border-top: 2px solid var(--purple); --accent: var(--purple)">
+                        <div><div class="stat-label">Total Tasks</div><div class="stat-value" id="aTotal">0</div></div>
+                        <i class="ph-fill ph-list-checks stat-icon" style="color:var(--purple)"></i>
+                    </div>
+                    <div class="glass stat-card" style="border-top: 2px solid var(--amber); --accent: var(--amber)">
+                        <div><div class="stat-label">Pending</div><div class="stat-value" id="aPend">0</div></div>
+                        <i class="ph-fill ph-clock stat-icon" style="color:var(--amber)"></i>
+                    </div>
+                    <div class="glass stat-card" style="border-top: 2px solid var(--green); --accent: var(--green)">
+                        <div><div class="stat-label">Completed</div><div class="stat-value" id="aComp">0</div></div>
+                        <i class="ph-fill ph-check-circle stat-icon" style="color:var(--green)"></i>
+                    </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="glass-panel ai-stat-card" style="border-top: 2px solid var(--ai-cyan); --accent: var(--ai-cyan);"><div><div class="stat-label">Users</div><div class="stat-value" id="a-stat-emp">0</div></div><i class="ph-fill ph-users" style="font-size:32px; color:var(--ai-cyan)"></i></div>
-                    <div class="glass-panel ai-stat-card" style="border-top: 2px solid var(--ai-purple); --accent: var(--ai-purple);"><div><div class="stat-label">Total Tasks</div><div class="stat-value" id="a-stat-total">0</div></div><i class="ph-fill ph-globe-hemisphere-west" style="font-size:32px; color:var(--ai-purple)"></i></div>
-                    <div class="glass-panel ai-stat-card" style="border-top: 2px solid var(--ai-gold); --accent: var(--ai-gold);"><div><div class="stat-label">Pending</div><div class="stat-value" id="a-stat-pending">0</div></div><i class="ph-fill ph-cpu" style="font-size:32px; color:var(--ai-gold)"></i></div>
-                    <div class="glass-panel ai-stat-card" style="border-top: 2px solid var(--ai-emerald); --accent: var(--ai-emerald);"><div><div class="stat-label">Completed</div><div class="stat-value" id="a-stat-completed">0</div></div><i class="ph-fill ph-check-circle" style="font-size:32px; color:var(--ai-emerald)"></i></div>
+                <div class="sec-header">
+                    <div class="sec-title"><i class="ph-fill ph-stack" style="color:var(--purple)"></i> Task Feed</div>
                 </div>
-
-                <h3 style="margin-bottom: 24px; font-size: 20px; color: var(--text-muted);">Task Feed</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px;" id="adminTaskList"></div>
+                <div class="admin-task-grid" id="admTaskGrid"></div>
             </div>
 
-            <div id="adminPersonnelView" class="view-section">
-                <div class="header-actions"><div><h2 style="font-size: 32px;">Employees</h2><p style="color: var(--text-muted);">Employee details and task analytics.</p></div></div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;" id="personnelGrid"></div>
+            <!-- ADMIN PEOPLE -->
+            <div class="view" id="vAdmPeople">
+                <div class="sec-header mb-4">
+                    <div class="sec-title"><i class="ph-fill ph-users-three" style="color:var(--cyan)"></i> Employees</div>
+                </div>
+                <div class="personnel-grid" id="peopleGrid"></div>
             </div>
 
-            <div id="adminAuditView" class="view-section">
-                <div class="header-actions"><div><h2 style="font-size: 32px;">System Logs</h2><p style="color: var(--text-muted);">Chronological activity logs.</p></div></div>
-                <div class="glass-panel" style="padding: 40px;">
-                    <div style="border-left: 2px solid rgba(0, 240, 255, 0.2); margin-left: 16px; padding-left: 32px; display: flex; flex-direction: column; gap: 32px;" id="auditTimeline"></div>
+            <!-- ADMIN LOGS -->
+            <div class="view" id="vAdmLogs">
+                <div class="sec-header mb-4">
+                    <div class="sec-title"><i class="ph-fill ph-activity" style="color:var(--cyan)"></i> System Logs</div>
+                </div>
+                <div class="glass" style="padding: 32px;">
+                    <div class="timeline" id="logTimeline"></div>
                 </div>
             </div>
 
-        </main>
+        </div>
     </div>
+</div>
 
 <script>
-    const API_URL = "http://127.0.0.1:8000";
-    let isLoginMode = true;
-    let employeesList = [];
-    let globalAdminTasks = []; 
+    const API = "http://127.0.0.1:8000";
+    let isLogin = true;
+    let empList = [];
+    let adminTasks = [];
 
-    // --- 1. AMBIENT MOUSE TRACKING ---
-    document.addEventListener('mousemove', (e) => {
-        document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    /* ===== MOUSE TRACKING ===== */
+    document.addEventListener('mousemove', e => {
+        document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+        document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
     });
 
-    // --- 2. UI UTILITIES ---
-    function showToast(msg, type = 'success') {
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div'); t.className = `toast ${type}`;
-        const icon = type === 'error' ? '<i class="ph-fill ph-warning-circle" style="color:var(--ai-pink); font-size:24px;"></i>' : '<i class="ph-fill ph-check-circle" style="color:var(--ai-cyan); font-size:24px;"></i>';
-        t.innerHTML = `${icon} <span style="font-weight:500;">${msg}</span>`;
-        c.appendChild(t); setTimeout(() => { t.style.opacity='0'; t.style.transform='translateX(100px) scale(0.9)'; setTimeout(()=>t.remove(),400); }, 3500);
-    }
-    
-    function switchView(viewId, navElement = null) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        if (navElement) { document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); navElement.classList.add('active'); }
-        if (viewId === 'empDashboardView') loadEmployeeData();
-        if (viewId.startsWith('admin')) loadAdminData();
+    /* ===== TOAST ===== */
+    function toast(msg, type = 'success') {
+        const wrap = document.getElementById('toastWrap');
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        const icon = type === 'error'
+            ? `<i class="ph-fill ph-x-circle" style="color:var(--pink);font-size:18px"></i>`
+            : `<i class="ph-fill ph-check-circle" style="color:var(--green);font-size:18px"></i>`;
+        el.innerHTML = `${icon}<span>${msg}</span>`;
+        wrap.appendChild(el);
+        setTimeout(() => {
+            el.style.transition = '0.3s'; el.style.opacity = '0'; el.style.transform = 'translateX(30px)';
+            setTimeout(() => el.remove(), 350);
+        }, 3500);
     }
 
+    /* ===== SIDEBAR MOBILE ===== */
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebarBg').classList.toggle('open'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarBg').classList.remove('open'); }
+
+    /* ===== MODALS ===== */
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
 
-    // --- 3. AUTHENTICATION ---
-   function toggleAuthMode() {
-    isLoginMode = !isLoginMode;
-
-    const authTitle = document.getElementById("authTitle");
-    const authBtn = document.getElementById("authBtn");
-    const authToggleText = document.getElementById("authToggleText");
-    const regFields = document.getElementById("reg-fields");
-
-    // Change titles/buttons
-    authTitle.innerText = isLoginMode
-        ? "AIMaven OS"
-        : "Registration";
-
-    authBtn.innerText = isLoginMode
-        ? "Login"
-        : "Register";
-
-    authToggleText.innerText = isLoginMode
-        ? "Request Access (Register)"
-        : "Back to Login";
-
-    // Show/Hide registration fields
-    if (isLoginMode) {
-        regFields.style.display = "none";
-    } else {
-        regFields.style.display = "flex";
+    /* ===== VIEW SWITCHING ===== */
+    const viewTitles = { vEmpDash: 'Dashboard', vAdmDash: 'Overview', vAdmPeople: 'Employees', vAdmLogs: 'System Logs' };
+    function gotoView(id, navEl) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('pageTitle').textContent = viewTitles[id] || '';
+        if (navEl) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); navEl.classList.add('active'); }
+        closeSidebar();
+        if (id === 'vEmpDash') loadEmpData();
+        if (id.startsWith('vAdm')) loadAdmData(id);
     }
-}
-    async function executeAuth() {
-        const u = document.getElementById("username").value.trim(); 
-        const p = document.getElementById("password").value.trim();
-        const btn = document.getElementById("authBtn"); 
-        
-        btn.innerHTML = '<i class="ph-fill ph-spinner-gap ph-spin"></i> Processing'; 
-        btn.disabled = true;
-        
+
+    /* ===== AUTH ===== */
+    function toggleAuth() {
+        isLogin = !isLogin;
+        document.getElementById('authTitle').textContent = isLogin ? 'AIMaven OS' : 'Create Account';
+        document.getElementById('authBtn').textContent = isLogin ? 'Login' : 'Register';
+        document.getElementById('authToggle').textContent = isLogin ? "Don't have access? Register →" : "Already have access? Login →";
+        const extra = document.getElementById('reg-extra');
+        extra.style.display = isLogin ? 'none' : 'flex';
+    }
+
+    async function doAuth() {
+        const u = document.getElementById('f-user').value.trim();
+        const p = document.getElementById('f-pass').value.trim();
+        const btn = document.getElementById('authBtn');
+        btn.textContent = '...'; btn.disabled = true;
         try {
-            if (isLoginMode) {
-                const fd = new URLSearchParams(); fd.append("username", u); fd.append("password", p);
-                const res = await fetch(`${API_URL}/auth/login`, { method: "POST", body: fd });
-                if (!res.ok) throw new Error("Login failed. Check credentials.");
-                
-                const data = await res.json();
-                localStorage.setItem("token", data.access_token); 
-                localStorage.setItem("role", data.role); 
-                localStorage.setItem("name", data.full_name);
-                showToast("Login successful."); 
-                checkAuthState();
+            if (isLogin) {
+                const fd = new URLSearchParams(); fd.append('username', u); fd.append('password', p);
+                const r = await fetch(`${API}/auth/login`, { method:'POST', body: fd });
+                if (!r.ok) throw new Error('Invalid credentials.');
+                const d = await r.json();
+                localStorage.setItem('token', d.access_token); localStorage.setItem('role', d.role); localStorage.setItem('name', d.full_name);
+                toast('Welcome back!'); initApp();
             } else {
-                const body = { 
-                    username: u, 
-                    password: p, 
-                    full_name: document.getElementById('fullname').value || "Unknown", 
-                    department: document.getElementById('department').value || "General", 
-                    role: "employee" 
-                };
-                
-                const res = await fetch(`${API_URL}/auth/register`, { 
-                    method: "POST", 
-                    headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify(body) 
-                });
-                
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.detail || "Registration failed.");
-                }
-                
-                showToast("Account created. Proceed to login."); 
-                
-               toggleAuthMode();
+                const body = { username:u, password:p, full_name: document.getElementById('f-name').value||'User', department: document.getElementById('f-dept').value||'General', role:'employee' };
+                const r = await fetch(`${API}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+                if (!r.ok) { const e=await r.json(); throw new Error(e.detail||'Registration failed.'); }
+                toast('Account created. Please login.'); toggleAuth();
             }
-        } catch (err) { 
-            showToast(err.message, "error"); 
-        } finally { 
-            btn.innerHTML = isLoginMode ? "Login" : "Register"; 
-            btn.disabled = false; 
+        } catch(e) { toast(e.message, 'error'); }
+        finally { btn.textContent = isLogin ? 'Login' : 'Register'; btn.disabled = false; }
+    }
+
+    function doLogout() { localStorage.clear(); toast('Logged out.'); initApp(); }
+    function headers() { return { 'Content-Type':'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }; }
+
+    /* ===== INIT ===== */
+    function initApp() {
+        const token = localStorage.getItem('token');
+        const role  = localStorage.getItem('role');
+        const name  = localStorage.getItem('name') || 'User';
+
+        const authScr = document.getElementById('authScreen');
+        const shell   = document.getElementById('appShell');
+
+        if (token) {
+            authScr.classList.add('hidden');
+            shell.classList.add('visible');
+            // Populate user info
+            document.getElementById('sAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('sName').textContent = name;
+            document.getElementById('sRole').textContent = role === 'admin' ? 'Administrator' : 'Employee';
+            // Set date defaults
+            const today = new Date().toISOString().split('T')[0];
+            ['t-date','a-date'].forEach(id => { const el = document.getElementById(id); if(el) el.value = today; });
+
+            if (role === 'admin') {
+                document.getElementById('nav-emp').style.display = 'none';
+                document.getElementById('nav-adm').style.display = 'block';
+                document.getElementById('exportBtn').style.display = 'flex';
+                document.getElementById('xpSection').style.display = 'none';
+                gotoView('vAdmDash', document.getElementById('defaultAdminNav'));
+            } else {
+                document.getElementById('nav-adm').style.display = 'none';
+                document.getElementById('nav-emp').style.display = 'block';
+                document.getElementById('exportBtn').style.display = 'none';
+                document.getElementById('xpSection').style.display = 'flex';
+                gotoView('vEmpDash');
+            }
+        } else {
+            authScr.classList.remove('hidden');
+            shell.classList.remove('visible');
+            document.getElementById('f-pass').value = '';
         }
     }
-    function logout() { localStorage.clear(); checkAuthState(); showToast("Logged out."); }
-    function getHeaders() { return { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` }; }
 
-    function checkAuthState() {
-        const token = localStorage.getItem("token"); const role = localStorage.getItem("role"); const name = localStorage.getItem("name");
-        if (token) {
-            document.getElementById("authSection").style.opacity = 0; document.getElementById("authSection").style.pointerEvents = "none";
-            document.getElementById("appLayout").classList.add("visible");
-            
-            document.getElementById("displayUsername").innerText = name; document.getElementById("displayRole").innerText = role === 'admin' ? 'Administrator' : 'Employee'; document.getElementById("userAvatar").innerText = name.charAt(0).toUpperCase();
-            const today = new Date().toISOString().split('T')[0];
-            if(document.getElementById("t-date")) document.getElementById("t-date").value = today; if(document.getElementById("a-date")) document.getElementById("a-date").value = today;
-
-            if (role === 'admin') { document.getElementById('nav-employee').style.display='none'; document.getElementById('nav-admin').style.display='flex'; switchView('adminDashboardView', document.getElementById('defaultAdminTab')); } 
-            else { document.getElementById('nav-admin').style.display='none'; document.getElementById('nav-employee').style.display='flex'; switchView('empDashboardView'); }
-        } else { document.getElementById("authSection").style.opacity = 1; document.getElementById("authSection").style.pointerEvents = "all"; document.getElementById("appLayout").classList.remove("visible"); document.getElementById("password").value = ""; }
-    }
-
-    // --- 4. EMPLOYEE LOGIC ---
-    async function loadEmployeeData() {
+    /* ===== EMPLOYEE DATA ===== */
+    async function loadEmpData() {
         try {
-            const res = await fetch(`${API_URL}/employee/tasks`, { headers: getHeaders() });
-            if(res.status === 401) return logout();
-            const tasks = await res.json();
-            
-            // Stats 
+            const r = await fetch(`${API}/employee/tasks`, { headers: headers() });
+            if (r.status === 401) return doLogout();
+            const tasks = await r.json();
+
             const total = tasks.length;
-            const completed = tasks.filter(t => t.status === 'completed').length;
-            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+            const done  = tasks.filter(t => t.status === 'completed').length;
+            const inProg = tasks.filter(t => t.status === 'in_progress').length;
+            const pct   = total === 0 ? 0 : Math.round((done/total)*100);
 
-            // Leveling 
-            const totalXP = completed * 150;
-            const level = Math.floor(totalXP / 1000) + 1;
-            const xpProgress = (totalXP % 1000) / 1000 * 100;
+            document.getElementById('eTotal').textContent  = total;
+            document.getElementById('eInProg').textContent = inProg;
+            document.getElementById('eDone').textContent   = done;
+            document.getElementById('eEff').textContent    = pct + '%';
+            setTimeout(() => { document.getElementById('eRing').style.strokeDashoffset = 138 - (138 * pct / 100); }, 100);
 
-            document.getElementById('e-stat-total').innerText = total; document.getElementById('e-stat-pending').innerText = tasks.filter(t=>t.status==='in_progress').length; document.getElementById('e-stat-completed').innerText = completed; document.getElementById('e-stat-percent').innerText = `${percent}%`;
-            
-            setTimeout(() => { document.getElementById('e-progress').style.strokeDashoffset = 176 - (176 * percent) / 100; }, 100);
-            
-            document.getElementById('emp-level').innerText = `LVL ${level}`;
-            setTimeout(() => { document.getElementById('emp-xp-bar').style.width = `${xpProgress}%`; }, 100);
+            // XP / Level
+            const xp = done * 150;
+            const lvl = Math.floor(xp / 1000) + 1;
+            const xpPct = (xp % 1000) / 10;
+            document.getElementById('xpLevel').textContent = `LVL ${lvl}`;
+            setTimeout(() => { document.getElementById('xpFill').style.width = xpPct + '%'; }, 100);
 
-            // Kanban Rendering
-            const kPen = document.getElementById("kb-pending"); kPen.innerHTML = ""; let penC=0;
-            const kInp = document.getElementById("kb-inprogress"); kInp.innerHTML = ""; let inpC=0;
-            const kCom = document.getElementById("kb-completed"); kCom.innerHTML = ""; let comC=0;
+            // Kanban
+            const cols = { pending: 'kbPen', in_progress: 'kbInp', completed: 'kbDon' };
+            const counts = { pending: 0, in_progress: 0, completed: 0 };
+            Object.values(cols).forEach(id => document.getElementById(id).innerHTML = '');
 
-            tasks.forEach((t) => {
-                const cardHTML = `
-                    <div class="ai-task-card ${t.status === 'completed' ? 'completed' : ''}">
-                        <div style="font-family:'Space Grotesk'; font-weight:600; font-size:16px; margin-bottom:8px; color: #fff;">${t.title}</div>
-                        ${t.description ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">${t.description}</div>` : ''}
-                        
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
-                            <span class="badge ${t.priority.toLowerCase()}">${t.priority}</span>
-                            ${t.due_date ? `<span class="badge tag"><i class="ph ph-calendar" style="margin-right:4px"></i>${t.due_date}</span>` : ''}
-                        </div>
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:12px;">
-                            <span style="font-size:12px; color:var(--text-muted);"><i class="ph ph-clock"></i> ${t.work_hours} hrs</span>
-                            <button class="btn" style="padding: 6px 12px; font-size:12px; border-color:var(--ai-purple); color:var(--ai-purple);" onclick="prepProgressModal(${t.id}, '${t.status}')">Update</button>
-                        </div>
+            tasks.forEach(t => {
+                if (!counts.hasOwnProperty(t.status)) return;
+                counts[t.status]++;
+                const priClass = { high:'badge-high', medium:'badge-medium', low:'badge-low' }[t.priority] || 'badge-tag';
+                const card = document.createElement('div');
+                card.className = `task-card ${t.status === 'completed' ? 'done' : ''}`;
+                card.innerHTML = `
+                    <div class="task-title">${esc(t.title)}</div>
+                    ${t.description ? `<div class="task-desc">${esc(t.description)}</div>` : ''}
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                        <span class="badge ${priClass}">${t.priority}</span>
+                        ${t.due_date ? `<span class="badge badge-tag"><i class="ph ph-calendar-blank"></i> ${t.due_date}</span>` : ''}
+                    </div>
+                    <div class="task-footer">
+                        <span class="text-sm text-muted"><i class="ph ph-clock"></i> ${t.work_hours || 0}h</span>
+                        <button class="btn btn-sm" style="color:var(--purple); border-color:rgba(162,89,255,0.3);" onclick="prepProgress(${t.id}, '${t.status}')">Update</button>
                     </div>`;
-                
-                if (t.status === 'pending') { kPen.innerHTML += cardHTML; penC++; }
-                else if (t.status === 'in_progress') { kInp.innerHTML += cardHTML; inpC++; }
-                else { kCom.innerHTML += cardHTML; comC++; }
+                document.getElementById(cols[t.status]).appendChild(card);
             });
-            document.getElementById('kb-pen-count').innerText = penC; document.getElementById('kb-inp-count').innerText = inpC; document.getElementById('kb-com-count').innerText = comC;
-        } catch (err) { showToast("Failed to load.", "error"); }
+
+            document.getElementById('cntPen').textContent = counts.pending;
+            document.getElementById('cntInp').textContent = counts.in_progress;
+            document.getElementById('cntDon').textContent = counts.completed;
+        } catch(e) { toast('Failed to load tasks.', 'error'); }
     }
 
-    async function createEmployeeTask() {
-        const title = document.getElementById("t-title").value.trim(); if (!title) return;
-        const body = { title, description: document.getElementById("t-desc").value, priority: document.getElementById("t-priority").value, due_date: document.getElementById("t-date").value };
-        const res = await fetch(`${API_URL}/employee/tasks`, { method: "POST", headers: getHeaders(), body: JSON.stringify(body) });
-        if (res.ok) { document.getElementById("t-title").value = ""; document.getElementById("t-desc").value = ""; showToast("Task created."); loadEmployeeData(); }
+    async function createTask() {
+        const title = document.getElementById('t-title').value.trim();
+        if (!title) { toast('Enter a task title.', 'error'); return; }
+        const body = { title, description: document.getElementById('t-desc').value, priority: document.getElementById('t-pri').value, due_date: document.getElementById('t-date').value };
+        const r = await fetch(`${API}/employee/tasks`, { method:'POST', headers:headers(), body:JSON.stringify(body) });
+        if (r.ok) { document.getElementById('t-title').value = ''; document.getElementById('t-desc').value = ''; toast('Task created!'); loadEmpData(); }
+        else toast('Create failed.', 'error');
     }
 
-    function prepProgressModal(id, currentStatus) {
-        document.getElementById('p-task-id').value = id; document.getElementById('p-status').value = currentStatus; document.getElementById('p-hours').value = ""; document.getElementById('p-update').value = ""; openModal('progressModal');
+    function prepProgress(id, status) {
+        document.getElementById('p-id').value = id;
+        document.getElementById('p-status').value = status;
+        document.getElementById('p-hours').value = '';
+        document.getElementById('p-note').value = '';
+        openModal('modalProgress');
     }
 
     async function submitProgress() {
-        const id = document.getElementById('p-task-id').value;
-        const body = { status: document.getElementById('p-status').value, work_hours: parseFloat(document.getElementById('p-hours').value || 0), daily_update: document.getElementById('p-update').value };
-        const res = await fetch(`${API_URL}/employee/tasks/${id}`, { method: "PATCH", headers: getHeaders(), body: JSON.stringify(body) });
-        if (res.ok) { showToast("Task updated."); closeModal('progressModal'); loadEmployeeData(); }
+        const id = document.getElementById('p-id').value;
+        const body = { status: document.getElementById('p-status').value, work_hours: parseFloat(document.getElementById('p-hours').value||0), daily_update: document.getElementById('p-note').value };
+        const r = await fetch(`${API}/employee/tasks/${id}`, { method:'PATCH', headers:headers(), body:JSON.stringify(body) });
+        if (r.ok) { toast('Task updated!'); closeModal('modalProgress'); loadEmpData(); }
+        else toast('Update failed.', 'error');
     }
 
-    // --- 5. ADMIN LOGIC ---
-    async function loadAdminData() {
+    /* ===== ADMIN DATA ===== */
+    async function loadAdmData(activeView) {
         try {
-            const resA = await fetch(`${API_URL}/admin/analytics`, { headers: getHeaders() });
-            if(resA.status === 401) return logout();
-            const an = await resA.json();
-            document.getElementById('a-stat-emp').innerText = an.employees; document.getElementById('a-stat-total').innerText = an.total_tasks; document.getElementById('a-stat-pending').innerText = an.pending; document.getElementById('a-stat-completed').innerText = an.completed;
+            const [rA, rE, rT] = await Promise.all([
+                fetch(`${API}/admin/analytics`, { headers: headers() }),
+                fetch(`${API}/admin/users`, { headers: headers() }),
+                fetch(`${API}/admin/tasks`, { headers: headers() })
+            ]);
+            if (rA.status === 401) return doLogout();
 
-            const resE = await fetch(`${API_URL}/admin/users`, { headers: getHeaders() }); employeesList = await resE.json();
-            const resT = await fetch(`${API_URL}/admin/tasks`, { headers: getHeaders() }); globalAdminTasks = await resT.json();
-            
-            const list = document.getElementById("adminTaskList"); list.innerHTML = "";
-            if (globalAdminTasks.length > 0) {
-                globalAdminTasks.sort((a,b) => b.id - a.id).forEach((t, i) => {
-                    const statusColor = t.status==='completed' ? 'var(--ai-emerald)' : t.status==='in_progress' ? 'var(--ai-gold)' : 'var(--border-subtle)';
-                    list.innerHTML += `
-                        <div class="glass-panel" style="border-top: 2px solid ${statusColor}; padding: 24px; position:relative; overflow:hidden;">
-                            <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:12px;">
-                                <h4 style="font-size:18px;">${t.title}</h4>
-                                <button class="btn" style="padding:6px; border:none; color:var(--ai-pink);" onclick="adminDeleteTask(${t.id})"><i class="ph ph-trash"></i></button>
-                            </div>
-                            <div style="font-size:13px; color:var(--ai-cyan); margin-bottom:12px;"><i class="ph-fill ph-user" style="margin-right:6px"></i>User: ${t.owner_name}</div>
-                            ${t.description ? `<p style="font-size:13px; color:var(--text-muted); margin-bottom:16px;">${t.description}</p>` : ''}
-                            
-                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-                                <span class="badge ${t.priority.toLowerCase()}">${t.priority}</span>
-                                <span class="badge tag" style="color:${statusColor}; border-color:${statusColor}">${t.status.replace('_',' ')}</span>
-                            </div>
+            const an = await rA.json();
+            empList    = await rE.json();
+            adminTasks = await rT.json();
 
-                            ${t.daily_update ? `
-                                <div style="background:rgba(0,0,0,0.4); border:1px solid rgba(0,240,255,0.15); padding:12px; border-radius:12px; font-size:12px; color:var(--text-main);">
-                                    <div style="color:var(--text-muted); text-transform:uppercase; font-size:10px; margin-bottom:4px; font-family:'Space Grotesk'">Update:</div>
-                                    "${t.daily_update}"
-                                </div>
-                            ` : ''}
-                        </div>`;
-                });
-            }
+            document.getElementById('aEmp').textContent   = an.employees;
+            document.getElementById('aTotal').textContent = an.total_tasks;
+            document.getElementById('aPend').textContent  = an.pending;
+            document.getElementById('aComp').textContent  = an.completed;
 
-            const pGrid = document.getElementById('personnelGrid'); pGrid.innerHTML = '';
-            employeesList.forEach((emp) => {
-                const empTasks = globalAdminTasks.filter(t => t.owner_id === emp.id);
-                const tCount = empTasks.length; const cCount = empTasks.filter(t => t.status === 'completed').length; const rate = tCount === 0 ? 0 : Math.round((cCount / tCount) * 100);
-                pGrid.innerHTML += `
-                    <div class="glass-panel glow-border" style="padding: 24px;">
-                        <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px;">
-                            <div class="avatar" style="width:56px; height:56px; font-size:24px; box-shadow:0 0 20px rgba(157,0,255,0.3);">${emp.full_name.charAt(0).toUpperCase()}</div>
-                            <div>
-                                <h4 style="font-size:18px; margin-bottom:4px;">${emp.full_name}</h4>
-                                <span class="badge tag"><i class="ph ph-cpu" style="margin-right:4px;"></i>${emp.department || 'General'}</span>
-                            </div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:12px; text-transform:uppercase; letter-spacing:1px;"><span style="color:var(--text-muted)">Efficiency</span><span style="color:var(--ai-emerald); font-weight:700;">${rate}%</span></div>
-                        <div style="background:rgba(255,255,255,0.05); height:4px; border-radius:2px; margin-bottom:24px; overflow:hidden;"><div style="width:${rate}%; height:100%; background:var(--ai-emerald); box-shadow:0 0 10px var(--ai-emerald);"></div></div>
-                        
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; text-align:center; border: 1px solid var(--border-subtle);">
-                                <div style="font-size:28px; font-weight:700; color:var(--ai-gold); font-family: 'Space Grotesk';">${tCount - cCount}</div>
-                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Pending</div>
-                            </div>
-                            <div style="background:rgba(0,0,0,0.3); padding:16px; border-radius:16px; text-align:center; border: 1px solid var(--border-subtle);">
-                                <div style="font-size:28px; font-weight:700; color:var(--ai-emerald); font-family: 'Space Grotesk';">${cCount}</div>
-                                <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px;">Completed</div>
-                            </div>
-                        </div>
-                    </div>`;
+            // Task feed
+            const grid = document.getElementById('admTaskGrid'); grid.innerHTML = '';
+            [...adminTasks].sort((a,b) => b.id - a.id).forEach(t => {
+                const sc = t.status === 'completed' ? 'var(--green)' : t.status === 'in_progress' ? 'var(--amber)' : 'var(--border)';
+                const priClass = { high:'badge-high', medium:'badge-medium', low:'badge-low' }[t.priority] || 'badge-tag';
+                const card = document.createElement('div');
+                card.className = 'glass admin-task-card';
+                card.style.setProperty('--accent-color', sc);
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; gap:10px;">
+                        <h4 style="font-family:'Manrope';font-size:15px;font-weight:700;line-height:1.3;">${esc(t.title)}</h4>
+                        <button class="btn btn-icon btn-sm btn-danger" style="flex-shrink:0;" onclick="adminDeleteTask(${t.id})" title="Delete"><i class="ph ph-trash" style="font-size:14px"></i></button>
+                    </div>
+                    <div style="font-size:12px; color:var(--cyan); margin-bottom:8px;"><i class="ph-fill ph-user" style="margin-right:4px"></i>${esc(t.owner_name)}</div>
+                    ${t.description ? `<div style="font-size:13px;color:var(--txt-2);margin-bottom:10px;">${esc(t.description)}</div>` : ''}
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:${t.daily_update?'12px':'0'};">
+                        <span class="badge ${priClass}">${t.priority}</span>
+                        <span class="badge badge-tag" style="color:${sc}; border-color:${sc}">${t.status.replace('_',' ')}</span>
+                        ${t.due_date ? `<span class="badge badge-tag">${t.due_date}</span>` : ''}
+                    </div>
+                    ${t.daily_update ? `<div style="font-size:12px;color:var(--txt-2);background:rgba(0,0,0,0.35);padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-top:10px;">"${esc(t.daily_update)}"</div>` : ''}`;
+                grid.appendChild(card);
             });
 
-            if(document.getElementById('adminAuditView').classList.contains('active')){
-                const resH = await fetch(`${API_URL}/admin/history`, { headers: getHeaders() });
-                const history = await resH.json();
-                const tl = document.getElementById("auditTimeline"); tl.innerHTML = "";
-                history.forEach(h => {
+            // People
+            const pGrid = document.getElementById('peopleGrid'); pGrid.innerHTML = '';
+            empList.forEach(emp => {
+                const empT = adminTasks.filter(t => t.owner_id === emp.id);
+                const total = empT.length; const done = empT.filter(t=>t.status==='completed').length;
+                const rate = total===0?0:Math.round((done/total)*100);
+                const card = document.createElement('div');
+                card.className = 'glass person-card';
+                card.innerHTML = `
+                    <div class="person-header">
+                        <div class="person-avatar">${emp.full_name.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div style="font-family:'Manrope';font-size:16px;font-weight:700;">${esc(emp.full_name)}</div>
+                            <span class="badge badge-tag" style="margin-top:4px;display:inline-flex;"><i class="ph ph-buildings" style="margin-right:3px"></i>${esc(emp.department||'General')}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+                        <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--txt-2);font-family:'Manrope';">Efficiency</span>
+                        <span style="font-family:'Manrope';font-weight:800;font-size:14px;color:var(--green);">${rate}%</span>
+                    </div>
+                    <div class="eff-bar-bg"><div class="eff-bar-fill" style="width:${rate}%"></div></div>
+                    <div class="person-stats">
+                        <div class="mini-stat">
+                            <div class="mini-stat-val" style="color:var(--amber);">${total-done}</div>
+                            <div class="mini-stat-lbl">Pending</div>
+                        </div>
+                        <div class="mini-stat">
+                            <div class="mini-stat-val" style="color:var(--green);">${done}</div>
+                            <div class="mini-stat-lbl">Done</div>
+                        </div>
+                    </div>`;
+                pGrid.appendChild(card);
+            });
+
+            // Logs
+            if (activeView === 'vAdmLogs') {
+                const rH = await fetch(`${API}/admin/history`, { headers: headers() });
+                const hist = await rH.json();
+                const tl = document.getElementById('logTimeline'); tl.innerHTML = '';
+                hist.forEach(h => {
                     const d = new Date(h.timestamp);
-                    tl.innerHTML += `
-                        <div style="position:relative;">
-                            <div style="position:absolute; left:-41px; top:0; width:16px; height:16px; border-radius:50%; background:var(--ai-cyan); box-shadow:0 0 15px var(--ai-cyan);"></div>
-                            <div style="font-size:12px; color:var(--ai-cyan); font-family:'Space Grotesk'; letter-spacing:1px; margin-bottom:8px;">${d.toLocaleDateString()} // ${d.toLocaleTimeString()}</div>
-                            <div class="glass-panel" style="padding: 16px; background:rgba(0,240,255,0.02); border-color:rgba(0,240,255,0.1);">
-                                <strong style="color:#fff;">${h.employee_name}</strong> <span style="color:var(--text-muted)">performed:</span> <span style="color:var(--ai-pink)">${h.action}</span>
-                                <div style="margin-top:8px; font-size:13px; color:var(--text-muted); border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">Task: "${h.task_title}"</div>
-                            </div>
+                    const item = document.createElement('div');
+                    item.className = 'tl-item';
+                    item.innerHTML = `
+                        <div class="tl-dot"></div>
+                        <div class="tl-time">${d.toLocaleDateString()} — ${d.toLocaleTimeString()}</div>
+                        <div class="tl-card">
+                            <span class="tl-actor">${esc(h.employee_name)}</span>
+                            <span style="color:var(--txt-2)"> · </span>
+                            <span class="tl-action">${esc(h.action)}</span>
+                            <div class="tl-task">Task: "${esc(h.task_title)}"</div>
                         </div>`;
+                    tl.appendChild(item);
                 });
             }
-        } catch (err) { showToast("Failed to load.", "error"); }
-    }
-
-    function exportCSV() {
-        if(globalAdminTasks.length === 0) return showToast("No data to export.", "error");
-        const headers = ["ID", "Task", "Description", "Assigned User", "Status", "Priority", "Deadline", "Hours Logged"];
-        const rows = globalAdminTasks.map(t => [ t.id, `"${(t.title||'').replace(/"/g,'""')}"`, `"${(t.description||'').replace(/"/g,'""')}"`, `"${t.owner_name}"`, t.status, t.priority, t.due_date||'None', t.work_hours ]);
-        const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }));
-        link.download = `AIMaven_Export_${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        showToast("Data exported.");
+        } catch(e) { toast('Failed to load data.', 'error'); }
     }
 
     function openAssignModal() {
         const sel = document.getElementById('a-emp'); sel.innerHTML = '';
-        employeesList.forEach(e => sel.innerHTML += `<option value="${e.id}">${e.full_name} (${e.department})</option>`);
-        openModal('assignModal');
+        empList.forEach(e => sel.innerHTML += `<option value="${e.id}">${esc(e.full_name)} (${esc(e.department||'General')})</option>`);
+        openModal('modalAssign'); closeSidebar();
     }
 
-    async function submitAssignTask() {
-        const owner_id = document.getElementById('a-emp').value; const title = document.getElementById('a-title').value.trim();
-        if(!title) return showToast("Title required", "error");
-        const res = await fetch(`${API_URL}/admin/assign-task?title=${encodeURIComponent(title)}&description=${encodeURIComponent(document.getElementById('a-desc').value)}&priority=${document.getElementById('a-priority').value}&due_date=${document.getElementById('a-date').value}&owner_id=${owner_id}`, { method: "POST", headers: getHeaders() });
-        if(res.ok) { showToast("Task assigned."); closeModal('assignModal'); loadAdminData(); }
+    async function submitAssign() {
+        const oid = document.getElementById('a-emp').value;
+        const title = document.getElementById('a-title').value.trim();
+        if (!title) { toast('Task title required.', 'error'); return; }
+        const r = await fetch(`${API}/admin/assign-task?title=${encodeURIComponent(title)}&description=${encodeURIComponent(document.getElementById('a-desc').value)}&priority=${document.getElementById('a-pri').value}&due_date=${document.getElementById('a-date').value}&owner_id=${oid}`, { method:'POST', headers:headers() });
+        if (r.ok) { toast('Task assigned!'); closeModal('modalAssign'); loadAdmData('vAdmDash'); }
+        else toast('Failed to assign.', 'error');
     }
 
     async function adminDeleteTask(id) {
-        if(!confirm("Are you sure you want to delete this task?")) return;
-        const res = await fetch(`${API_URL}/admin/tasks/${id}`, { method: "DELETE", headers: getHeaders() });
-        if(res.ok) { showToast("Task deleted."); loadAdminData(); }
+        if (!confirm('Delete this task?')) return;
+        const r = await fetch(`${API}/admin/tasks/${id}`, { method:'DELETE', headers:headers() });
+        if (r.ok) { toast('Task deleted.'); loadAdmData('vAdmDash'); }
+        else toast('Delete failed.', 'error');
     }
 
-    checkAuthState();
+    function exportCSV() {
+        if (!adminTasks.length) { toast('No data to export.', 'error'); return; }
+        const rows = [
+            ['ID','Title','Description','User','Status','Priority','Due Date','Hours'],
+            ...adminTasks.map(t => [t.id, `"${(t.title||'').replace(/"/g,'""')}"`, `"${(t.description||'').replace(/"/g,'""')}"`, `"${t.owner_name}"`, t.status, t.priority, t.due_date||'', t.work_hours||0])
+        ];
+        const csv = rows.map(r=>r.join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+        a.download = `AIMaven_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+        toast('CSV exported!');
+    }
+
+    /* ===== UTILS ===== */
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    /* ===== BOOT ===== */
+    initApp();
 </script>
 </body>
 </html>
