@@ -13,25 +13,31 @@
             1. FUTURISTIC DESIGN SYSTEM & VARIABLES
         ========================================================= */
         :root {
+            /* Deep Space Palette */
             --bg-base: #030305;
             --bg-surface: rgba(12, 12, 18, 0.4);
             --bg-glass-card: rgba(20, 20, 30, 0.25);
             
+            /* Holographic Borders */
             --border-subtle: rgba(255, 255, 255, 0.05);
             --border-glow: rgba(0, 240, 255, 0.15);
             
+            /* Neon Accents */
             --ai-cyan: #00f0ff;
             --ai-purple: #9d00ff;
             --ai-pink: #ff0055;
             --ai-emerald: #00ff9d;
             --ai-gold: #ffb800;
             
+            /* Typography */
             --text-main: #f8fafc;
             --text-muted: #8a8f98;
             
+            /* Shadows & Depth */
             --shadow-hologram: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
             --inner-glow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
             
+            /* Mouse Tracking (Updated via JS) */
             --mouse-x: 50%;
             --mouse-y: 50%;
         }
@@ -42,12 +48,13 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-base);
             color: var(--text-main);
-            overflow-x: hidden;
+            overflow: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
         h1, h2, h3, h4, .font-display { font-family: 'Space Grotesk', sans-serif; }
 
+        /* Custom Neural Scrollbar */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--ai-purple); border-radius: 10px; box-shadow: 0 0 10px var(--ai-purple); }
@@ -55,6 +62,7 @@
         /* =========================================================
             2. AMBIENT ENGINE (MOUSE TRACKING & ORBS)
         ========================================================= */
+        /* Dynamic Spotlight that follows the mouse */
         .spotlight {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none; z-index: 9999;
@@ -62,6 +70,7 @@
             mix-blend-mode: screen;
         }
 
+        /* Mesh Gradient Background */
         .ambient-mesh {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
             background: 
@@ -70,6 +79,7 @@
             filter: blur(60px);
         }
 
+        /* Noise Texture for Realism */
         .noise-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
@@ -77,7 +87,7 @@
         }
 
         /* =========================================================
-            3. GLASSMORPHISM UI COMPONENTS
+            3. GLASSMORPHISM 2.0 UI COMPONENTS
         ========================================================= */
         .glass-panel {
             background: var(--bg-glass-card);
@@ -87,7 +97,10 @@
             border-radius: 20px;
         }
 
-        .glow-border { position: relative; }
+        /* Animated Gradient Borders */
+        .glow-border {
+            position: relative;
+        }
         .glow-border::before {
             content: ""; position: absolute; inset: -1px; border-radius: inherit;
             background: linear-gradient(90deg, var(--ai-cyan), var(--ai-purple), var(--ai-pink), var(--ai-cyan));
@@ -98,6 +111,7 @@
 
         @keyframes gradientShift { 0% { background-position: 0% 0; } 100% { background-position: 300% 0; } }
 
+        /* Liquid Buttons */
         .btn {
             background: rgba(255, 255, 255, 0.03); color: var(--text-main);
             border: 1px solid var(--border-subtle); padding: 12px 24px; border-radius: 12px;
@@ -114,12 +128,23 @@
         .btn:hover::after { left: 100%; }
         .btn:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
         
-        .btn-primary { background: linear-gradient(135deg, var(--ai-cyan), var(--ai-purple)); border: none; box-shadow: 0 0 20px rgba(157, 0, 255, 0.4); color: #fff; }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--ai-cyan), var(--ai-purple));
+            border: none; box-shadow: 0 0 20px rgba(157, 0, 255, 0.4);
+            color: #fff;
+        }
         .btn-primary:hover { box-shadow: 0 0 30px rgba(0, 240, 255, 0.6); transform: scale(1.02) translateY(-2px); }
 
-        .input-glass { width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border-subtle); border-radius: 14px; color: var(--text-main); font-family: 'Inter'; font-size: 15px; transition: all 0.3s; outline: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+        /* Inputs */
+        .input-glass {
+            width: 100%; padding: 16px 20px; background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-subtle); border-radius: 14px;
+            color: var(--text-main); font-family: 'Inter'; font-size: 15px;
+            transition: all 0.3s; outline: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
         .input-glass:focus { border-color: var(--ai-cyan); box-shadow: 0 0 20px rgba(0,240,255,0.2), inset 0 2px 10px rgba(0,0,0,0.5); }
 
+        /* Badges */
         .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .b-high { background: rgba(255, 0, 85, 0.1); color: var(--ai-pink); border: 1px solid rgba(255, 0, 85, 0.3); box-shadow: 0 0 10px rgba(255,0,85,0.2); }
         .b-med { background: rgba(255, 184, 0, 0.1); color: var(--ai-gold); border: 1px solid rgba(255, 184, 0, 0.3); }
@@ -134,18 +159,26 @@
         .view-section { display: none; animation: viewReveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
         .view-section.active { display: block; }
         @keyframes viewReveal { 
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(10px); } 
-            100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } 
+            0% { opacity: 0; transform: translateY(20px) scale(0.98) rotateX(5deg); filter: blur(10px); } 
+            100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0deg); filter: blur(0); } 
         }
 
-        .sidebar { width: 280px; padding: 32px 24px; margin: 16px; border-radius: 24px; display: flex; flex-direction: column; gap: 32px; z-index: 10; transition: transform 0.4s ease; flex-shrink: 0; }
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px; padding: 32px 24px; margin: 16px; border-radius: 24px;
+            display: flex; flex-direction: column; gap: 32px; z-index: 10; transition: transform 0.4s ease; flex-shrink: 0;
+        }
         .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .nav-item { padding: 14px 16px; border-radius: 12px; cursor: pointer; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.3s; position: relative; overflow: hidden; }
+        .nav-item {
+            padding: 14px 16px; border-radius: 12px; cursor: pointer; color: var(--text-muted);
+            font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.3s;
+            position: relative; overflow: hidden;
+        }
         .nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
         .nav-item.active { color: var(--ai-cyan); background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.1); }
         .nav-item.active::before { content:''; position:absolute; left:0; top:20%; height:60%; width:3px; background:var(--ai-cyan); border-radius: 0 4px 4px 0; box-shadow: 0 0 10px var(--ai-cyan); }
 
-        .main-content { flex: 1; padding: 40px 60px; overflow-y: auto; overflow-x: hidden; }
+        .main-content { flex: 1; padding: 40px 60px; overflow-y: auto; overflow-x: hidden; perspective: 1000px; }
 
         /* Structural utility classes */
         .header-actions { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; gap: 16px; }
@@ -163,40 +196,61 @@
             5. DASHBOARD WIDGETS
         ========================================================= */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 40px; }
-        .ai-stat-card { padding: 24px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; position: relative; transition: transform 0.4s; }
+        .ai-stat-card {
+            padding: 24px; display: flex; align-items: center; justify-content: space-between;
+            overflow: hidden; position: relative; transition: transform 0.4s;
+        }
         .ai-stat-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.2); }
-        .ai-stat-card::after { content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; filter: blur(20px); }
-        .stat-value { font-size: 36px; font-weight: 700; background: linear-gradient(to right, #fff, #a0a0a0); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        /* Neural Background Pattern */
+        .ai-stat-card::after {
+            content: ''; position: absolute; right: -20px; bottom: -20px; width: 100px; height: 100px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.1; filter: blur(20px);
+        }
+        .stat-value { font-size: 36px; font-weight: 700; background: linear-gradient(to right, #fff, #a0a0a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .stat-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 8px; }
 
+        /* SVG Circular Progress (AI Score) */
         .ring-container { position: relative; width: 64px; height: 64px; }
         .ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 6; }
         .ring-fill { fill: none; stroke: url(#ai-gradient); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 176; stroke-dashoffset: 176; transition: stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .ring-text { position: absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-weight:700; font-size:14px; font-family: 'Space Grotesk'; }
 
         /* =========================================================
-            6. TASKS & KANBAN
+            6. TASKS & KANBAN (WITH CUSTOM SCROLLBAR)
         ========================================================= */
-        .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .kanban-col { background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 20px; min-height: 500px; display: flex; flex-direction: column; gap: 16px; }
-        .kanban-col-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 8px; font-family: 'Space Grotesk'; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+       .kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .kanban-col { background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 16px; height: 600px; max-height: 65vh; }
+        .kanban-col-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px; margin-bottom: 8px; font-family: 'Space Grotesk'; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
         
-        .ai-task-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); padding: 20px; border-radius: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        /* FIX: Scrollable Container with padding buffer so scaled cards/shadows don't clip */
+        .kanban-list {
+            display: flex; flex-direction: column; gap: 16px;
+            flex: 1; overflow-y: auto; 
+            padding: 12px 16px 12px 12px; /* Breathing room for hover scaling & box-shadows */
+            margin: -12px -16px -12px -12px; /* Offset the padding to maintain visual layout alignment */
+        }
+        .kanban-list::-webkit-scrollbar { width: 4px; }
+        .kanban-list::-webkit-scrollbar-track { background: transparent; }
+        .kanban-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+        .kanban-list::-webkit-scrollbar-thumb:hover { background: var(--ai-cyan); }
+        
+        .ai-task-card {
+            background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle);
+            padding: 20px; border-radius: 16px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; flex-shrink: 0;
+        }
         .ai-task-card:hover { transform: translateY(-5px) scale(1.02); background: rgba(255,255,255,0.04); border-color: var(--ai-cyan); box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px rgba(0,240,255,0.1); }
         .ai-task-card.completed { opacity: 0.6; filter: grayscale(50%); }
         .ai-task-card.completed:hover { filter: grayscale(0%); opacity: 1; }
 
-        /* Admin Grids */
-        .admin-task-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 24px; }
-        .personnel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-
         /* =========================================================
-            7. MODALS & AUTH
+            7. MODALS & AUTH (HOLOGRAPHIC)
         ========================================================= */
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; pointer-events: none; transition: 0.4s; padding: 20px; }
         .overlay.active { opacity: 1; pointer-events: all; }
         
         .auth-container { width: 100%; max-width: 420px; position: relative; }
+        /* Holographic Scanner effect */
         .auth-container::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--ai-cyan); box-shadow: 0 0 20px var(--ai-cyan); animation: scan 3s ease-in-out infinite alternate; z-index: 10; border-radius: 50%; opacity: 0.5; }
         @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
@@ -217,7 +271,7 @@
 
         @media (max-width: 992px) {
             .kanban-board { grid-template-columns: 1fr; }
-            .kanban-col { min-height: auto; }
+            .kanban-col { height: auto; max-height: 500px; }
             .admin-task-grid { grid-template-columns: 1fr; }
             .personnel-grid { grid-template-columns: 1fr; }
         }
@@ -262,7 +316,7 @@
         <div class="auth-container">
             <div class="glass-panel" style="padding: 48px;">
                 <div style="text-align: center; margin-bottom: 40px;">
-                    <i class="ph-fill ph-hexagon" style="font-size: 56px; background: linear-gradient(to bottom right, var(--ai-cyan), var(--ai-purple)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                    <i class="ph-fill ph-hexagon" style="font-size: 56px; background: linear-gradient(to bottom right, var(--ai-cyan), var(--ai-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
                     <h2 id="authTitle" style="font-size: 32px; margin-top: 16px;">AIMaven OS</h2>
                     <p style="color: var(--text-muted); font-size: 14px; letter-spacing: 2px; text-transform: uppercase;">System Access</p>
                 </div>
@@ -360,7 +414,7 @@
                     <div class="header-title-wrapper">
                         <button class="mobile-toggle" onclick="toggleSidebar()"><i class="ph ph-list"></i></button>
                         <div>
-                            <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-cyan)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Dashboard</h2>
+                            <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Dashboard</h2>
                             <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Welcome back.</p>
                         </div>
                     </div>
@@ -409,15 +463,15 @@
                 <div class="kanban-board" id="empKanbanBoard">
                     <div class="kanban-col glow-border">
                         <div class="kanban-col-header"><span>Pending</span> <span class="badge" style="background:rgba(255,255,255,0.1)" id="kb-pen-count">0</span></div>
-                        <div id="kb-pending" style="display:flex; flex-direction:column; gap:16px;"></div>
+                        <div id="kb-pending" class="kanban-list"></div>
                     </div>
                     <div class="kanban-col glow-border" style="border-color: rgba(255,184,0,0.2);">
                         <div class="kanban-col-header"><span style="color:var(--ai-gold)">In Progress</span> <span class="badge b-med" id="kb-inp-count">0</span></div>
-                        <div id="kb-inprogress" style="display:flex; flex-direction:column; gap:16px;"></div>
+                        <div id="kb-inprogress" class="kanban-list"></div>
                     </div>
                     <div class="kanban-col glow-border" style="border-color: rgba(0,255,157,0.2);">
                         <div class="kanban-col-header"><span style="color:var(--ai-emerald)">Completed</span> <span class="badge b-low" id="kb-com-count">0</span></div>
-                        <div id="kb-completed" style="display:flex; flex-direction:column; gap:16px;"></div>
+                        <div id="kb-completed" class="kanban-list"></div>
                     </div>
                 </div>
             </div>
@@ -427,7 +481,7 @@
                     <div class="header-title-wrapper">
                         <button class="mobile-toggle" onclick="toggleSidebar()"><i class="ph ph-list"></i></button>
                         <div>
-                            <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-pink)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Admin Dashboard</h2>
+                            <h2 style="font-size: 32px; background: linear-gradient(to right, #fff, var(--ai-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Admin Dashboard</h2>
                             <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Global system overview.</p>
                         </div>
                     </div>
