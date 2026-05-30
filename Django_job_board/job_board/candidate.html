@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Portal | JobBoard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { primary: '#2563eb', secondary: '#1e293b', accent: '#38bdf8' } }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+<div id="app" class="flex flex-col min-h-screen">
+
+    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-briefcase text-primary text-2xl mr-3"></i>
+                    <span class="font-bold text-xl tracking-tight text-slate-900">JobBoard<span class="text-primary">Careers</span></span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="#" class="text-slate-500 hover:text-primary font-medium transition">Find Jobs</a>
+                    <a href="#" class="text-slate-500 hover:text-primary font-medium transition">My Applications</a>
+                    <div class="flex items-center gap-2 pl-4 border-l border-slate-200">
+                        <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">P</div>
+                        <span class="text-sm font-medium text-slate-700">Parth S.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex gap-8">
+        
+        <aside class="w-1/3 hidden md:block space-y-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-16 h-16 rounded-full bg-slate-100 border-2 border-primary flex items-center justify-center text-primary text-2xl">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold">Parth Santoki</h2>
+                        <p class="text-sm text-slate-500">Software Developer</p>
+                    </div>
+                </div>
+                <div class="space-y-3 pt-4 border-t border-slate-100">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-500">Profile Completeness</span>
+                        <span class="font-bold text-primary">85%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <button class="w-full mt-2 text-sm text-primary font-medium hover:text-blue-800">Edit Profile</button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h3 class="font-bold text-slate-800 mb-4">Filter Jobs</h3>
+                <div class="space-y-4 text-sm">
+                    <div>
+                        <label class="font-medium text-slate-700 block mb-2">Job Type</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-primary focus:ring-primary"> Full-Time</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-primary focus:ring-primary"> Remote</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" class="rounded text-primary focus:ring-primary"> Contract</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 space-y-6">
+            
+            <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex">
+                <div class="flex-1 flex items-center px-4">
+                    <i class="fa-solid fa-magnifying-glass text-slate-400 mr-3"></i>
+                    <input v-model="searchQuery" type="text" placeholder="Search by title, skill, or keyword..." class="w-full outline-none text-slate-700 py-2">
+                </div>
+                <button class="bg-primary hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition">Search</button>
+            </div>
+
+            <div v-if="loading" class="text-center py-12">
+                <i class="fa-solid fa-circle-notch fa-spin text-4xl text-primary mb-4"></i>
+                <p class="text-slate-500">Searching for open positions...</p>
+            </div>
+
+            <div v-else-if="filteredJobs.length === 0" class="text-center py-12 bg-white rounded-xl border border-slate-200 shadow-sm">
+                <i class="fa-solid fa-inbox text-5xl text-slate-300 mb-4"></i>
+                <h3 class="text-lg font-bold text-slate-800">No jobs found</h3>
+                <p class="text-slate-500">Try adjusting your search criteria.</p>
+            </div>
+
+            <div v-else class="space-y-4">
+                <div v-for="job in filteredJobs" :key="job.id" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold text-slate-900 group-hover:text-primary transition">{{ job.title }}</h3>
+                            <p class="text-slate-500 text-sm mt-1">Posted recently &bull; 14 Applicants</p>
+                        </div>
+                        <span class="bg-blue-50 text-primary text-xs font-bold px-3 py-1 rounded-full">Actively Hiring</span>
+                    </div>
+                    <p class="text-slate-600 mb-6 line-clamp-2">{{ job.description }}</p>
+                    
+                    <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                        <div class="flex gap-2">
+                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded">Remote</span>
+                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded">Full-Time</span>
+                        </div>
+                        <button @click="openApplyModal(job)" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-lg font-medium transition text-sm">
+                            Apply Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div v-if="selectedJob" class="fixed inset-0 bg-slate-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all">
+            <div class="bg-slate-50 px-6 py-5 border-b border-slate-200 flex justify-between items-start">
+                <div>
+                    <p class="text-sm text-primary font-bold uppercase tracking-wider mb-1">Applying for</p>
+                    <h3 class="text-xl font-bold text-slate-900">{{ selectedJob.title }}</h3>
+                </div>
+                <button @click="selectedJob = null" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form @submit.prevent="submitApplication" class="p-6 space-y-5">
+                
+                <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition cursor-pointer bg-slate-50">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
+                    <p class="font-medium text-slate-700">Upload your Resume</p>
+                    <p class="text-xs text-slate-500 mt-1">PDF, DOCX up to 5MB</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Cover Letter (Optional)</label>
+                    <textarea v-model="applicationText" rows="4" class="w-full rounded-xl border-slate-300 shadow-sm border p-3 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition text-sm" placeholder="Why are you a great fit for this role?"></textarea>
+                </div>
+                
+                <div class="flex gap-3 pt-2">
+                    <button type="button" @click="selectedJob = null" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition">Cancel</button>
+                    <button type="submit" :disabled="isSubmitting" class="flex-1 bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition flex justify-center items-center">
+                        <i v-if="isSubmitting" class="fa-solid fa-circle-notch fa-spin mr-2"></i>
+                        {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div v-if="toast.show" class="fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-all z-50">
+        <i class="fa-solid fa-circle-check text-green-400 text-xl"></i>
+        <div>
+            <h4 class="font-bold text-sm">{{ toast.title }}</h4>
+            <p class="text-slate-300 text-xs mt-0.5">{{ toast.message }}</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+        setup() {
+            const API_BASE = 'http://127.0.0.1:8000/api';
+            
+            // State
+            const jobs = ref([]);
+            const loading = ref(true);
+            const isSubmitting = ref(false);
+            const searchQuery = ref('');
+            const selectedJob = ref(null);
+            const applicationText = ref('');
+            
+            // Toast System
+            const toast = ref({ show: false, title: '', message: '' });
+            const showToast = (title, message) => {
+                toast.value = { show: true, title, message };
+                setTimeout(() => toast.value.show = false, 5000);
+            };
+
+            // Fetch Jobs API Call
+            const fetchJobs = async () => {
+                loading.value = true;
+                try {
+                    const res = await fetch(`${API_BASE}/jobs/`);
+                    jobs.value = await res.json();
+                } catch (err) {
+                    console.error('API Error:', err);
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            // Search Filter Logic
+            const filteredJobs = computed(() => {
+                if (!searchQuery.value) return jobs.value;
+                const lowerCaseQuery = searchQuery.value.toLowerCase();
+                return jobs.value.filter(job => 
+                    job.title.toLowerCase().includes(lowerCaseQuery) || 
+                    (job.description && job.description.toLowerCase().includes(lowerCaseQuery))
+                );
+            });
+
+            // Handle Apply
+            const openApplyModal = (job) => {
+                selectedJob.value = job;
+                applicationText.value = '';
+            };
+
+            const submitApplication = async () => {
+                isSubmitting.value = true;
+                
+                // Simulate an API call delay for effect
+                setTimeout(() => {
+                    isSubmitting.value = false;
+                    selectedJob.value = null;
+                    showToast('Application Sent!', 'The employer has received your resume and cover letter.');
+                }, 1500);
+            };
+
+            // Initialization
+            onMounted(() => {
+                fetchJobs();
+            });
+
+            return {
+                jobs, loading, isSubmitting, searchQuery, filteredJobs,
+                selectedJob, applicationText, toast,
+                openApplyModal, submitApplication
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
